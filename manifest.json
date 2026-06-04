@@ -1,0 +1,16 @@
+{
+  "name": "مدبر البيت - فواتير ومقاضي ومهام",
+  "short_name": "مدبر البيت",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#6543D8",
+  "description": "تطبيق عائلي لإدارة الفواتير والمقاضي والمهام والميزانية والتقارير.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
