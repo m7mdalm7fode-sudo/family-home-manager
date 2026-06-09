@@ -1,518 +1,17 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>مدبر البيت | فواتير ومقاضي ومهام العائلة</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#6543D8">
-  <link rel="icon" type="image/svg+xml" href="icon.svg">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <style>
-    :root{
-      --bg:#f6f7fb;--card:#fff;--txt:#121826;--muted:#667085;--line:#e7eaf1;
-      --primary:#6543D8;--primary2:#4b32a8;--green:#139A63;--amber:#E89A24;--red:#E04F5F;
-      --soft:#f0edff;--soft2:#ecfdf3;--shadow:0 14px 38px rgba(16,24,40,.08);
-      --r:24px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:linear-gradient(180deg,#f1edff 0,#f6f7fb 320px);color:var(--txt);line-height:1.55}
-    button,input,select,textarea{font-family:inherit}
-    .hidden{display:none!important}.app{max-width:1260px;margin:auto;padding:16px}.ltr{direction:ltr;text-align:left}
-    .hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#4b32a8,#8d6bff);color:white;border-radius:30px;padding:20px 22px;margin-bottom:14px;box-shadow:0 20px 45px rgba(101,67,216,.25);overflow:hidden;position:relative}
-    .hero:before{content:"";position:absolute;inset:-80px auto auto -50px;width:230px;height:230px;background:rgba(255,255,255,.12);border-radius:50%}
-    .brand{display:flex;align-items:center;gap:12px;z-index:1}.logo{width:58px;height:58px;border-radius:20px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:31px;border:1px solid rgba(255,255,255,.25)}
-    .hero h1{font-size:28px;letter-spacing:-.5px}.hero p{font-size:13px;opacity:.92;max-width:760px}
-    .hero-actions{display:flex;gap:8px;flex-wrap:wrap;z-index:1;justify-content:flex-end}.role-pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:rgba(255,255,255,.16);padding:8px 11px;font-size:12px;font-weight:900;border:1px solid rgba(255,255,255,.2)}
-    .btn{border:0;border-radius:14px;padding:10px 14px;font-weight:900;cursor:pointer;background:#fff;color:#1f2937;box-shadow:0 4px 14px rgba(0,0,0,.07)}
-    .btn:hover{transform:translateY(-1px)}.btn.primary{background:var(--primary);color:white}.btn.dark{background:#151827;color:white}.btn.ghost{background:rgba(255,255,255,.16);color:white;border:1px solid rgba(255,255,255,.25)}
-    .btn.green{background:var(--green);color:white}.btn.red{background:#fff0f2;color:#b42337}.btn.amber{background:#fff7e8;color:#9a5b00}.btn.secondary{background:#f8fafc;color:#1f2937;border:1px solid var(--line)}
-    .btn.small{padding:7px 10px;border-radius:11px;font-size:12px}.btn.icon{width:40px;height:40px;padding:0;display:grid;place-items:center;font-size:18px}
-    .nav{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin:12px 0 16px}.tab{background:white;border:1px solid var(--line);border-radius:18px;padding:12px 8px;text-align:center;cursor:pointer;color:#475467;font-weight:900;box-shadow:0 4px 12px rgba(16,24,40,.04);font-size:13px}
-    .tab.active{background:var(--primary);color:white;border-color:var(--primary)}.page{display:none}.page.active{display:block}
-    .grid{display:grid;gap:14px}.cols2{grid-template-columns:1fr 1fr}.cols3{grid-template-columns:repeat(3,1fr)}.cols4{grid-template-columns:repeat(4,1fr)}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:14px}.title{font-size:18px;font-weight:950;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}.subtitle{font-size:13px;color:var(--muted);font-weight:700}
-    label{display:block;font-size:12px;font-weight:900;color:#536071;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:13px;padding:10px 11px;font-size:14px;outline:none}textarea{min-height:86px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:#a795ff;box-shadow:0 0 0 4px rgba(101,67,216,.12)}
-    .metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 7px 18px rgba(16,24,40,.05)}.metric .k{font-size:12px;color:var(--muted);font-weight:900}.metric .v{font-size:23px;font-weight:950;margin-top:3px}.metric .n{font-size:12px;color:var(--muted)}
-    .list{display:grid;gap:10px}.row{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px}.row:hover{border-color:#d5ccff}.row-main{display:flex;align-items:center;gap:10px;min-width:0}.row-text{min-width:0}.row h3{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row p{font-size:12px;color:var(--muted)}
-    .thumb{width:54px;height:54px;border-radius:16px;background:#f2f4f7;display:grid;place-items:center;overflow:hidden;flex:0 0 auto}.thumb img{width:100%;height:100%;object-fit:cover}
-    .badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:950;background:#f2f4f7;color:#475467}.badge.green{background:#e9f8f0;color:#087443}.badge.amber{background:#fff3df;color:#9a5b00}.badge.red{background:#fff0f2;color:#b42337}.badge.purple{background:#f0edff;color:#4B32A8}.badge.blue{background:#edf5ff;color:#175cd3}
-    .actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.muted{color:var(--muted);font-size:13px}.hr{height:1px;background:var(--line);margin:12px 0}
-    table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line);font-size:13px;background:white}th{background:#f8f7ff;color:#4B32A8;text-align:right;padding:11px;border-bottom:1px solid var(--line)}td{padding:10px;border-bottom:1px solid #f0f2f6;vertical-align:top}tr:last-child td{border-bottom:none}
-    .hint{background:#f8f7ff;border:1px solid #ded7ff;color:#4B32A8;border-radius:18px;padding:12px;font-size:13px;margin-bottom:12px}.empty{background:#fff;border:1px dashed #cfd6e3;border-radius:18px;padding:24px;text-align:center;color:var(--muted);font-weight:800}
-    .modal{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:flex-end;justify-content:center;z-index:50;padding:12px}.modal.show{display:flex}.sheet{background:#fff;border-radius:28px 28px 18px 18px;padding:18px;width:min(860px,100%);max-height:92vh;overflow:auto;box-shadow:0 24px 80px rgba(0,0,0,.22)}.sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.close{width:38px;height:38px;border-radius:13px;border:0;background:#f2f4f7;font-weight:950;cursor:pointer}
-    .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:white;cursor:pointer;font-size:12px;font-weight:900;color:#475467}.chip.active{background:var(--primary);border-color:var(--primary);color:white}
-    .auth-wrap{min-height:100vh;display:grid;place-items:center;padding:18px}.auth-card{width:min(480px,100%);background:white;border:1px solid var(--line);border-radius:30px;padding:22px;box-shadow:var(--shadow)}.auth-logo{width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,#4b32a8,#8d6bff);display:grid;place-items:center;color:#fff;font-size:36px;margin:auto auto 12px}.center{text-align:center}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f2f4f7;border-radius:16px;padding:5px;margin:14px 0}.auth-tabs button{background:transparent;box-shadow:none}.auth-tabs button.active{background:#fff;color:var(--primary)}
-    .bar{height:11px;background:#eef1f6;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,#139A63,#6543D8);border-radius:999px}.report-bar{display:flex;align-items:center;gap:9px;margin:8px 0}.report-bar .name{width:120px;font-size:12px;color:#475467}.report-bar .bar{flex:1}.report-bar .amount{width:110px;text-align:left;font-size:12px;font-weight:900}
-    .guard{filter:blur(4px);user-select:none;pointer-events:none}.admin-only-note{background:#fff7e8;border:1px solid #ffd89a;color:#8a4b00;padding:12px;border-radius:18px;margin-bottom:12px;font-size:13px;font-weight:800}
-    @media(max-width:980px){.nav{grid-template-columns:repeat(4,1fr)}.cols2,.cols3,.cols4{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero h1{font-size:23px}.app{padding:12px}.row{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start;width:100%}}
-    @media(max-width:520px){.nav{grid-template-columns:repeat(2,1fr)}.tab{font-size:12px}.hero-actions{width:100%;justify-content:flex-start}.metric .v{font-size:20px}}
-  </style>
-</head>
-<body>
-
-<div id="authView" class="auth-wrap hidden">
-  <div class="auth-card">
-    <div class="auth-logo">🏠</div>
-    <h1 class="center">مدبر البيت</h1>
-    <p class="center muted">تسجيل دخول العائلة لإدارة الفواتير والمقاضي والمهام.</p>
-    <div id="demoWarn" class="hint hidden" style="margin-top:14px">وضع تجريبي: لم يتم وضع إعدادات Firebase بعد. البيانات محفوظة على هذا الجهاز فقط.</div>
-    <div class="auth-tabs">
-      <button id="loginTab" class="active" onclick="setAuthMode('login')">دخول</button>
-      <button id="signupTab" onclick="setAuthMode('signup')">حساب جديد</button>
-    </div>
-    <div class="grid">
-      <div><label>البريد الإلكتروني</label><input id="authEmail" type="email" placeholder="name@email.com"></div>
-      <div><label>كلمة المرور</label><input id="authPass" type="password" placeholder="••••••••"></div>
-      <div id="authNameBox" class="hidden"><label>الاسم</label><input id="authName" placeholder="مثال: محمد"></div>
-      <button class="btn primary" onclick="submitAuth()" id="authSubmit">تسجيل الدخول</button>
-      <button class="btn secondary hidden" id="demoLoginBtn" onclick="demoLogin('admin')">دخول تجريبي كحساب رئيسي</button>
-      <button class="btn secondary hidden" id="demoMemberBtn" onclick="demoLogin('member')">دخول تجريبي كحساب ثانوي</button>
-    </div>
-  </div>
-</div>
-
-<div id="setupView" class="auth-wrap hidden">
-  <div class="auth-card">
-    <div class="auth-logo">👨‍👩‍👧‍👦</div>
-    <h2 class="center">ربط حسابك ببيت</h2>
-    <p class="center muted">أنشئ بيت جديد كحساب رئيسي، أو ادخل كود العائلة للانضمام كحساب ثانوي.</p>
-    <div class="grid" style="margin-top:14px">
-      <div><label>اسم البيت</label><input id="newFamilyName" placeholder="مثال: بيت العجمي"></div>
-      <button class="btn primary" onclick="createFamily()">إنشاء بيت جديد</button>
-      <div class="hr"></div>
-      <div><label>كود العائلة</label><input id="joinFamilyCode" placeholder="مثال: FAM-12345"></div>
-      <button class="btn secondary" onclick="joinFamily()">انضمام للبيت</button>
-      <button class="btn red" onclick="logout()">تسجيل خروج</button>
-    </div>
-  </div>
-</div>
-
-<div id="appView" class="app hidden">
-  <header class="hero">
-    <div class="brand">
-      <div class="logo">🏠</div>
-      <div>
-        <h1 id="homeTitle">مدبر البيت</h1>
-        <p id="homeSub">تطبيق عائلي للفواتير، المقاضي، المهام، الميزانية، والتقارير الشهرية.</p>
-      </div>
-    </div>
-    <div class="hero-actions">
-      <span class="role-pill" id="rolePill">حساب</span>
-      <button class="btn ghost icon" onclick="showPage('settings')" title="الإعدادات">⚙️</button>
-      <button class="btn ghost icon" onclick="logout()" title="تسجيل خروج">🚪</button>
-    </div>
-  </header>
-
-  <nav class="nav" id="tabs">
-    <div class="tab active" data-page="dashboard">الرئيسية</div>
-    <div class="tab" data-page="bills">الفواتير</div>
-    <div class="tab" data-page="catalog">المقاضي</div>
-    <div class="tab" data-page="shopping">الشراء</div>
-    <div class="tab" data-page="tasks">المهام</div>
-    <div class="tab" data-page="expenses">المصاريف</div>
-    <div class="tab" data-page="reports">التقارير</div>
-    <div class="tab" data-page="settings">الإعدادات</div>
-  </nav>
-
-  <section id="dashboard" class="page active">
-    <div class="grid cols4">
-      <div class="metric"><div class="k">مصروفات هذا الشهر</div><div class="v" id="mExpenses">0</div><div class="n">ريال</div></div>
-      <div class="metric admin-only"><div class="k">المتبقي من الميزانية</div><div class="v" id="mBudgetLeft">0</div><div class="n">للحساب الرئيسي فقط</div></div>
-      <div class="metric"><div class="k">قيمة قائمة الشراء</div><div class="v" id="mShopping">0</div><div class="n">من / إلى</div></div>
-      <div class="metric"><div class="k">المهام المفتوحة</div><div class="v" id="mTasks">0</div><div class="n">مهمة</div></div>
-    </div>
-    <div class="grid cols2">
-      <div class="card">
-        <div class="title">تنبيهات مهمة</div>
-        <div id="alerts" class="list"></div>
-      </div>
-      <div class="card">
-        <div class="title">أرخص بدائل حسب المجموعة</div>
-        <div id="cheapList" class="list"></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="bills" class="page">
-    <div class="card">
-      <div class="title"><span>الفواتير والالتزامات</span><button class="btn primary" onclick="openBill()">+ إضافة فاتورة</button></div>
-      <div class="hint">أي مستخدم يقدر يسجل فاتورة، والحساب الرئيسي يقدر يشوف أثرها في الميزانية والتقارير.</div>
-      <div id="billsList" class="list"></div>
-    </div>
-  </section>
-
-  <section id="catalog" class="page">
-    <div class="card">
-      <div class="title">
-        <span>قائمة المقاضي المعتادة</span>
-        <div class="actions">
-          <button class="btn secondary" onclick="seedDefaultGroceries()">إضافة قائمة اعتيادية</button>
-          <button class="btn primary" onclick="openItem()">+ إضافة صنف</button>
-        </div>
-      </div>
-      <div class="grid cols3" style="margin-bottom:12px">
-        <div><label>بحث</label><input id="searchItems" placeholder="معكرونة، رز، دجاج..." oninput="render()"></div>
-        <div><label>تصنيف</label><select id="filterCat" onchange="render()"><option value="">الكل</option></select></div>
-        <div><label>عرض</label><select id="filterView" onchange="render()"><option value="">كل الأصناف</option><option value="preferred">المعتمدة فقط</option><option value="cheap">الأرخص في مجموعتها</option></select></div>
-      </div>
-      <div id="itemsList" class="list"></div>
-    </div>
-  </section>
-
-  <section id="shopping" class="page">
-    <div class="card">
-      <div class="title">
-        <span>قائمة الشراء</span>
-        <div class="actions">
-          <button class="btn secondary" onclick="buildRoutineList()">إنشاء من المعتمد</button>
-          <button class="btn primary" onclick="openShopping()">+ إضافة</button>
-        </div>
-      </div>
-      <div id="shoppingList" class="list"></div>
-    </div>
-  </section>
-
-  <section id="tasks" class="page">
-    <div class="card">
-      <div class="title">
-        <span>مهام العائلة</span>
-        <button class="btn primary" onclick="openTask()">+ إرسال مهمة</button>
-      </div>
-      <div class="hint">صار بإمكانك اختيار أصناف من قائمة المقاضي داخل المهمة، مع الكميات والملاحظات.</div>
-      <div id="tasksList" class="list"></div>
-    </div>
-  </section>
-
-  <section id="expenses" class="page">
-    <div class="card">
-      <div class="title">
-        <span>المصاريف الفعلية</span>
-        <button class="btn primary" onclick="openExpense()">+ تسجيل مصروف</button>
-      </div>
-      <div class="grid cols3" style="margin-bottom:12px">
-        <div><label>الشهر</label><input id="expenseMonth" type="month" onchange="render()"></div>
-        <div><label>تصنيف</label><select id="expenseCat" onchange="render()"><option value="">الكل</option><option>فواتير</option><option>مقاضي</option><option>منظفات</option><option>أخرى</option></select></div>
-      </div>
-      <div id="expensesList" class="list"></div>
-    </div>
-  </section>
-
-  <section id="reports" class="page">
-    <div class="card">
-      <div class="title">التقارير الشهرية</div>
-      <div class="grid cols3" style="margin-bottom:12px">
-        <div><label>الشهر</label><input id="reportMonth" type="month" onchange="renderReports()"></div>
-        <div><label>نوع التقرير</label><select id="reportType" onchange="renderReports()"><option value="all">الكل</option><option value="فواتير">فواتير</option><option value="مقاضي">مقاضي</option><option value="منظفات">منظفات</option><option value="أخرى">أخرى</option></select></div>
-      </div>
-      <div id="budgetNotice" class="admin-only-note hidden">الميزانية الشهرية تظهر للحساب الرئيسي فقط، أما الحسابات الثانوية تظهر لها المصاريف بدون تفاصيل الميزانية.</div>
-      <div id="reportsBox"></div>
-    </div>
-  </section>
-
-  <section id="settings" class="page">
-    <div class="card">
-      <div class="title">إعدادات الحساب والبيت</div>
-      <div class="grid cols3">
-        <div><label>اسم المستخدم</label><input id="profileName" oninput="saveProfile()" /></div>
-        <div><label>البريد</label><input id="profileEmail" disabled /></div>
-        <div><label>الصلاحية</label><input id="profileRole" disabled /></div>
-      </div>
-      <div class="hr"></div>
-      <div class="grid cols3">
-        <div><label>اسم البيت</label><input id="familyName" oninput="saveFamilySettings()"></div>
-        <div><label>عدد أفراد البيت</label><input id="familySize" type="number" min="1" oninput="saveFamilySettings()"></div>
-        <div><label>العملة</label><input id="currency" oninput="saveFamilySettings()"></div>
-      </div>
-    </div>
-
-    <div class="card admin-only">
-      <div class="title">الميزانية الشهرية <span class="badge purple">للحساب الرئيسي فقط</span></div>
-      <div class="grid cols4">
-        <div><label>ميزانية إجمالية</label><input id="budgetTotal" type="number" oninput="saveFamilySettings()"></div>
-        <div><label>ميزانية المقاضي</label><input id="budgetGroceries" type="number" oninput="saveFamilySettings()"></div>
-        <div><label>ميزانية الفواتير</label><input id="budgetBills" type="number" oninput="saveFamilySettings()"></div>
-        <div><label>ميزانية أخرى</label><input id="budgetOther" type="number" oninput="saveFamilySettings()"></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="title">أفراد العائلة</div>
-      <div class="hint admin-only">كود الانضمام للعائلة: <b id="familyCode"></b> — أعطه لأي فرد، وبعد دخوله يصبح حسابه ثانوي تلقائياً.</div>
-      <div id="membersList" class="list"></div>
-    </div>
-  </section>
-</div>
-
-<div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
-
-<script type="module">
-/*
-  1) أنشئ مشروع Firebase.
-  2) فعّل Authentication > Email/Password.
-  3) أنشئ Cloud Firestore.
-  4) انسخ إعدادات Firebase هنا.
-*/
-const firebaseConfig = {
-  apiKey: "AIzaSyAM5zoLTOGvwrcCUamBIfQPvQuvdpZEN1Q",
-  authDomain: "family-home-manager-be84e.firebaseapp.com",
-  projectId: "family-home-manager-be84e",
-  storageBucket: "family-home-manager-be84e.firebasestorage.app",
-  messagingSenderId: "363780667177",
-  appId: "1:363780667177:web:ad4576b09c155ea693a938"
-};
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-import {
-  getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  signOut, updateProfile
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc,
-  onSnapshot, query, where, getDocs, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
-const DEMO = !firebaseConfig.apiKey || firebaseConfig.apiKey.includes("YOUR_");
-let app=null, auth=null, fs=null;
-if(!DEMO){
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  fs = getFirestore(app);
-}
-
-const STORE_KEY='home-family-manager-demo-v2';
-let authMode='login';
-let currentUser=null;
-let currentFamilyId=null;
-let currentMember={role:'member',name:''};
-let family={name:'بيتنا',familySize:5,currency:'ر.س',familyCode:'',budget:{total:0,groceries:0,bills:0,other:0}};
-let data={bills:[],items:[],shopping:[],tasks:[],expenses:[],members:[]};
-let unsubs=[];
-let editCtx=null;
-
-const CATS=['مقاضي أساسية','لحوم ودواجن','ألبان وبيض','خضار وفواكه','معلبات','منظفات','عناية شخصية','فواتير','أخرى'];
-const $=id=>document.getElementById(id);
-const v=id=>$(id)?.value?.trim()||'';
-const num=id=>parseFloat(v(id))||0;
-const money=n=>(Number(n)||0).toLocaleString('ar-SA',{maximumFractionDigits:1});
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-const todayISO=()=>new Date().toISOString().slice(0,10);
-const monthNow=()=>new Date().toISOString().slice(0,7);
-const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const isAdmin=()=>['owner','admin'].includes(currentMember.role);
-const avg=(a,b)=>((Number(a)||0)+(Number(b)||0))/2;
-const byId=(id,arr)=>arr.find(x=>x.id===id);
-const periodMonthAmount=b=>(Number(b.amount)||0)*(b.period==='سنوي'?1/12:b.period==='أسبوعي'?4.345:1);
-function daysBetween(date){if(!date)return 999; const d=new Date(date+'T00:00:00'); const t=new Date(); t.setHours(0,0,0,0); return Math.round((d-t)/(1000*60*60*24));}
-function sum(arr, fn){return arr.reduce((s,x)=>s+(fn?fn(x):Number(x)||0),0)}
-
-window.setAuthMode=(m)=>{authMode=m;$('loginTab').classList.toggle('active',m==='login');$('signupTab').classList.toggle('active',m==='signup');$('authNameBox').classList.toggle('hidden',m==='login');$('authSubmit').textContent=m==='login'?'تسجيل الدخول':'إنشاء حساب';}
-window.submitAuth=async()=>{
-  const email=v('authEmail'), pass=v('authPass'), name=v('authName');
-  if(!email||!pass)return alert('اكتب البريد وكلمة المرور');
-  try{
-    if(DEMO){return demoLogin(authMode==='signup'?'admin':'member')}
-    if(authMode==='signup'){
-      const cred=await createUserWithEmailAndPassword(auth,email,pass);
-      if(name) await updateProfile(cred.user,{displayName:name});
-    }else{
-      await signInWithEmailAndPassword(auth,email,pass);
-    }
-  }catch(e){alert('خطأ: '+e.message)}
-}
-window.demoLogin=(role='admin')=>{
-  currentUser={uid:role==='admin'?'demo-admin':'demo-member',email:role==='admin'?'admin@demo.com':'member@demo.com',displayName:role==='admin'?'الحساب الرئيسي':'حساب ثانوي'};
-  currentMember={id:currentUser.uid,uid:currentUser.uid,name:currentUser.displayName,email:currentUser.email,role};
-  const local=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');
-  if(!local.family){local.family={name:'بيتنا',familySize:5,currency:'ر.س',familyCode:'FAM-DEMO',budget:{total:2500,groceries:1200,bills:700,other:600}}}
-  if(!local.data){local.data={bills:[],items:[],shopping:[],tasks:[],expenses:[],members:[]}}
-  family=local.family; data=local.data;
-  if(!data.members.length)data.members=[currentMember];
-  currentFamilyId='demo-family';
-  showApp();
-}
-window.logout=async()=>{
-  unsubs.forEach(u=>u&&u());unsubs=[];
-  if(DEMO){currentUser=null;currentFamilyId=null;showAuth();return;}
-  await signOut(auth);
-}
-
-if(DEMO){
-  $('demoWarn').classList.remove('hidden');
-  $('demoLoginBtn').classList.remove('hidden');
-  $('demoMemberBtn').classList.remove('hidden');
-  showAuth();
-}else{
-  onAuthStateChanged(auth, async user=>{
-    unsubs.forEach(u=>u&&u());unsubs=[];
-    currentUser=user;
-    if(!user){showAuth();return;}
-    await loadUserFamily();
-  });
-}
-
-async function loadUserFamily(){
-  const uref=doc(fs,'users',currentUser.uid);
-  const snap=await getDoc(uref);
-  if(!snap.exists() || !snap.data().currentFamilyId){showSetup();return;}
-  currentFamilyId=snap.data().currentFamilyId;
-  currentMember={uid:currentUser.uid,name:currentUser.displayName||snap.data().name||currentUser.email,email:currentUser.email,role:snap.data().role||'member'};
-  subscribeFamily();
-  showApp();
-}
-window.createFamily=async()=>{
-  const name=v('newFamilyName')||'بيتنا';
-  if(DEMO){family={name,familySize:5,currency:'ر.س',familyCode:'FAM-DEMO',budget:{total:2500,groceries:1200,bills:700,other:600}};data={bills:[],items:[],shopping:[],tasks:[],expenses:[],members:[]};return demoLogin('admin')}
-  const id=uid(); const code='FAM-'+Math.floor(10000+Math.random()*89999);
-  await setDoc(doc(fs,'families',id),{name,familySize:5,currency:'ر.س',familyCode:code,budget:{total:0,groceries:0,bills:0,other:0},createdAt:serverTimestamp(),ownerUid:currentUser.uid});
-  await setDoc(doc(fs,'families',id,'members',currentUser.uid),{uid:currentUser.uid,name:currentUser.displayName||currentUser.email,email:currentUser.email,role:'owner',joinedAt:serverTimestamp()});
-  await setDoc(doc(fs,'users',currentUser.uid),{currentFamilyId:id,role:'owner',name:currentUser.displayName||currentUser.email,email:currentUser.email},{merge:true});
-  await loadUserFamily();
-}
-window.joinFamily=async()=>{
-  const code=v('joinFamilyCode');
-  if(!code)return alert('اكتب كود العائلة');
-  if(DEMO)return demoLogin('member');
-  const qy=query(collection(fs,'families'),where('familyCode','==',code));
-  const res=await getDocs(qy);
-  if(res.empty)return alert('الكود غير صحيح');
-  const fam=res.docs[0]; const fid=fam.id;
-  await setDoc(doc(fs,'families',fid,'members',currentUser.uid),{uid:currentUser.uid,name:currentUser.displayName||currentUser.email,email:currentUser.email,role:'member',joinedAt:serverTimestamp()});
-  await setDoc(doc(fs,'users',currentUser.uid),{currentFamilyId:fid,role:'member',name:currentUser.displayName||currentUser.email,email:currentUser.email},{merge:true});
-  await loadUserFamily();
-}
-function subscribeFamily(){
-  unsubs.push(onSnapshot(doc(fs,'families',currentFamilyId),snap=>{family={...family,...snap.data()};render()}));
-  ['bills','items','shopping','tasks','expenses','members'].forEach(col=>{
-    unsubs.push(onSnapshot(collection(fs,'families',currentFamilyId,col),snap=>{
-      data[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
-      if(col==='members'){
-        const me=data.members.find(m=>m.uid===currentUser.uid);
-        if(me) currentMember=me;
-      }
-      render();
-    }));
-  });
-}
-function persistDemo(){if(DEMO)localStorage.setItem(STORE_KEY,JSON.stringify({family,data}))}
-async function saveDoc(col,obj){
-  if(DEMO){
-    if(!obj.id)obj.id=uid();
-    const arr=data[col]; const idx=arr.findIndex(x=>x.id===obj.id); idx>-1?arr[idx]=obj:arr.push(obj);
-    persistDemo(); render(); return obj.id;
-  }
-  if(obj.id){const id=obj.id; delete obj.id; await setDoc(doc(fs,'families',currentFamilyId,col,id),obj,{merge:true}); return id;}
-  const ref=await addDoc(collection(fs,'families',currentFamilyId,col),{...obj,createdAt:serverTimestamp(),createdBy:currentUser.uid}); return ref.id;
-}
-async function removeDoc(col,id){
-  if(!confirm('تأكيد الحذف؟'))return;
-  if(DEMO){data[col]=data[col].filter(x=>x.id!==id);persistDemo();render();return;}
-  await deleteDoc(doc(fs,'families',currentFamilyId,col,id));
-}
-
-function showAuth(){ $('authView').classList.remove('hidden'); $('setupView').classList.add('hidden'); $('appView').classList.add('hidden');}
-function showSetup(){ $('authView').classList.add('hidden'); $('setupView').classList.remove('hidden'); $('appView').classList.add('hidden');}
-function showApp(){ $('authView').classList.add('hidden'); $('setupView').classList.add('hidden'); $('appView').classList.remove('hidden'); render();}
-window.showPage=(page)=>{
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.page===page));
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===page));
-  render();
-}
-document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>showPage(t.dataset.page));
-
-function currentMonthExpenses(){
-  const m=$('reportMonth')?.value||monthNow();
-  const type=$('reportType')?.value||'all';
-  return data.expenses.filter(e=>(e.date||'').startsWith(m) && (type==='all'||e.category===type));
-}
-function expenseMonthList(){
-  const m=$('expenseMonth')?.value||monthNow();
-  const cat=$('expenseCat')?.value||'';
-  return data.expenses.filter(e=>(e.date||'').startsWith(m) && (!cat||e.category===cat));
-}
-function categorySums(arr){
-  const out={}; arr.forEach(e=>{out[e.category||'أخرى']=(out[e.category||'أخرى']||0)+(Number(e.amount)||0)}); return out;
-}
-function unitPrice(i){let size=Number(i.unitSize)||1; return avg(i.priceMin,i.priceMax)/size}
-function cheapestByGroups(){
-  const groups={}; data.items.forEach(i=>{const g=(i.group||i.name||'').trim(); if(!g)return; (groups[g]=groups[g]||[]).push(i)});
-  return Object.entries(groups).map(([g,arr])=>({group:g,items:arr.slice().sort((a,b)=>(unitPrice(a)||999999)-(unitPrice(b)||999999))})).filter(x=>x.items.length>1);
-}
-function calcDays(i, qty=1){
-  const fam=Number(family.familySize)||1,total=(Number(i.unitSize)||1)*(Number(qty)||1),daily=(Number(i.dailyPerPerson)||0)*fam+(Number(i.dailyFixed)||0);
-  if(!daily)return null; return total/daily;
-}
-function calcDaysText(i,qty=1){const d=calcDays(i,qty);return d?`${Math.max(1,Math.round(d))} يوم`:'غير محدد'}
-function thumb(i){return `<div class="thumb">${i?.image?`<img src="${i.image}" alt="">`:'🛒'}</div>`}
-
-function render(){
-  if(!$('appView') || $('appView').classList.contains('hidden')) return;
-  const cur=family.currency||'ر.س';
-  $('homeTitle').textContent=family.name||'مدبر البيت';
-  $('homeSub').textContent=`${currentUser?.email||''}`;
-  $('rolePill').textContent=isAdmin()?'👑 حساب رئيسي':'👤 حساب ثانوي';
-
-  document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('hidden',!isAdmin()));
-  $('budgetNotice')?.classList.toggle('hidden',isAdmin());
-
-  const month=monthNow();
-  const expensesThis=data.expenses.filter(e=>(e.date||'').startsWith(month));
-  const spent=sum(expensesThis,e=>Number(e.amount)||0);
-  const budgetTotal=Number(family.budget?.total)||0;
-  const shopMin=sum(data.shopping.filter(s=>!s.done),s=>{const i=byId(s.itemId,data.items)||{};return (Number(i.priceMin)||0)*(Number(s.qty)||1)});
-  const shopMax=sum(data.shopping.filter(s=>!s.done),s=>{const i=byId(s.itemId,data.items)||{};return (Number(i.priceMax)||Number(i.priceMin)||0)*(Number(s.qty)||1)});
-
-  $('mExpenses').textContent=`${money(spent)} ${cur}`;
-  if($('mBudgetLeft')) $('mBudgetLeft').textContent=`${money(budgetTotal-spent)} ${cur}`;
-  $('mShopping').textContent=`${money(shopMin)} - ${money(shopMax)} ${cur}`;
-  $('mTasks').textContent=data.tasks.filter(t=>t.status!=='done').length;
-
-  renderAlerts(); renderCheap(); renderBills(); renderFilters(); renderItems(); renderShopping(); renderTasks(); renderExpenses(); renderReports(); renderSettings();
-}
-function renderAlerts(){
-  const rows=[];
-  data.bills.forEach(b=>{let d=daysBetween(b.dueDate); if(d<=5)rows.push({type:d<0?'red':d<=2?'amber':'green',text:`${b.name} مستحقة ${d<0?'منذ '+Math.abs(d)+' يوم':'بعد '+d+' يوم'}`,sub:`المبلغ: ${money(b.amount)} ${family.currency}`})});
-  data.tasks.filter(t=>t.status!=='done').forEach(t=>{let d=daysBetween(t.dueDate); if(d<=2)rows.push({type:'amber',text:`مهمة: ${t.title}`,sub:`على: ${t.assignedTo||'-'} | ${d<0?'متأخرة':'متبقي '+d+' يوم'}`})});
-  $('alerts').innerHTML=rows.length?rows.map(r=>`<div class="row"><div><h3>${esc(r.text)}</h3><p>${esc(r.sub)}</p></div><span class="badge ${r.type}">تنبيه</span></div>`).join(''):`<div class="empty">لا توجد تنبيهات حالياً</div>`;
-}
-function renderCheap(){
-  const list=cheapestByGroups(); $('cheapList').innerHTML=list.length?list.slice(0,8).map(x=>{const b=x.items[0];return `<div class="row"><div class="row-main">${thumb(b)}<div class="row-text"><h3>${esc(x.group)}: ${esc(b.name)}</h3><p>الأوفر تقريباً: ${money(unitPrice(b))} ${family.currency} لكل ${esc(b.unitLabel||'وحدة')}</p></div></div><span class="badge green">أوفر</span></div>`}).join(''):`<div class="empty">أضف أكثر من نوع لنفس المجموعة مثل "معكرونة" لعرض الأرخص.</div>`;
-}
-function renderBills(){
-  $('billsList').innerHTML=data.bills.length?data.bills.map(b=>{const d=daysBetween(b.dueDate),cls=d<0?'red':d<=3?'amber':'green';return `<div class="row"><div><h3>${esc(b.name)}</h3><p>${esc(b.category||'فاتورة')} | ${money(b.amount)} ${family.currency} | ${b.period||'شهري'} | استحقاق: ${b.dueDate||'-'}</p></div><div class="actions"><span class="badge ${cls}">${d<0?'متأخر':d+' يوم'}</span><button class="btn small green" onclick="payBill('${b.id}')">تسجيل دفع</button><button class="btn small" onclick="openBill('${b.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('bills','${b.id}')">حذف</button></div></div>`}).join(''):`<div class="empty">لا توجد فواتير.</div>`;
-}
-function renderFilters(){
-  const sel=$('filterCat'); if(!sel)return; const current=sel.value; const cats=[...new Set([...CATS,...data.items.map(i=>i.category).filter(Boolean)])];
-  sel.innerHTML='<option value="">الكل</option>'+cats.map(c=>`<option ${current===c?'selected':''}>${esc(c)}</option>`).join('');
-}
-function renderItems(){
-  const q=($('searchItems')?.value||'').toLowerCase(),cat=$('filterCat')?.value||'',view=$('filterView')?.value||'';
-  const cheapIds=new Set(cheapestByGroups().map(g=>g.items[0].id));
-  const arr=data.items.filter(i=>(!q||(i.name+i.group+i.brand).toLowerCase().includes(q))&&(!cat||i.category===cat)&&(!view||(view==='preferred'?i.preferred:view==='cheap'?cheapIds.has(i.id):true)));
-  $('itemsList').innerHTML=arr.length?arr.map(i=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name)} ${i.preferred?'<span class="badge purple">معتمد</span>':''}</h3><p>${esc(i.category||'-')} | المجموعة: ${esc(i.group||'-')} | ${money(i.priceMin)} - ${money(i.priceMax||i.priceMin)} ${family.currency} | ${esc(i.store||'سعر تقريبي')}</p><p>يكفي تقريباً: <b>${calcDaysText(i)}</b></p></div></div><div class="actions"><button class="btn small green" onclick="addToShopping('${i.id}')">أضف للشراء</button><button class="btn small" onclick="openItem('${i.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('items','${i.id}')">حذف</button></div></div>`).join(''):`<div class="empty">لا توجد أصناف.</div>`;
-}
-function renderShopping(){
-  $('shoppingList').innerHTML=data.shopping.length?data.shopping.map(s=>{const i=byId(s.itemId,data.items)||{};return `<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'')}</p></div></div><div class="actions"><button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button><button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div></div>`}).join(''):`<div class="empty">قائمة الشراء فارغة.</div>`;
-}
-function taskItemsText(t){
-  const arr=t.items||[]; if(!arr.length)return '';
-  return arr.map(x=>{const i=byId(x.itemId,data.items)||{};return `- ${i.name||'صنف'} × ${x.qty||1}${x.note?' | '+x.note:''}`}).join('\n');
-}
-function renderTasks(){
-  $('tasksList').innerHTML=data.tasks.length?data.tasks.map(t=>`<div class="row"><div><h3>${esc(t.title)} ${t.status==='done'?'<span class="badge green">منجزة</span>':'<span class="badge amber">مفتوحة</span>'}</h3><p>إلى: ${esc(t.assignedTo||'-')} | تاريخ: ${t.dueDate||'-'}</p><p style="white-space:pre-line">${esc(taskItemsText(t)||t.details||'')}</p></div><div class="actions"><button class="btn small green" onclick="toggleTask('${t.id}')">${t.status==='done'?'فتح':'إنجاز'}</button><button class="btn small" onclick="openTask('${t.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('tasks','${t.id}')">حذف</button></div></div>`).join(''):`<div class="empty">لا توجد مهام.</div>`;
 }
 function renderExpenses(){
   if(!$('expenseMonth').value)$('expenseMonth').value=monthNow();
   const arr=expenseMonthList();
-  $('expensesList').innerHTML=arr.length?arr.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`<div class="row"><div><h3>${esc(e.title)}</h3><p>${esc(e.category)} | ${e.date||'-'} | ${money(e.amount)} ${family.currency}</p><p>${esc(e.notes||'')}</p></div><div class="actions"><button class="btn small" onclick="openExpense('${e.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('expenses','${e.id}')">حذف</button></div></div>`).join(''):`<div class="empty">لا توجد مصاريف لهذا الشهر.</div>`;
+  const manage=can('canManageExpenses');
+  $('expensesList').innerHTML=arr.length?arr.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`<div class="row"><div><h3>${esc(e.title)}</h3><p>${esc(e.category)} | ${e.date||'-'} | ${money(e.amount)} ${family.currency}</p><p>${esc(e.notes||'')}</p></div>${manage?`<div class="actions"><button class="btn small" onclick="openExpense('${e.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('expenses','${e.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">لا توجد مصاريف لهذا الشهر.</div>`;
 }
 function renderReports(){
+  if(!can('canViewReports')){$('reportsBox').innerHTML='<div class="empty">ليس لديك صلاحية لعرض التقارير.</div>';return;}
   if(!$('reportMonth').value)$('reportMonth').value=monthNow();
   const arr=currentMonthExpenses(), total=sum(arr,e=>Number(e.amount)||0), cats=categorySums(arr), max=Math.max(1,...Object.values(cats));
   const b=family.budget||{}, budgetTotal=Number(b.total)||0;
   let html=`<div class="grid cols3"><div class="metric"><div class="k">إجمالي المصاريف</div><div class="v">${money(total)} ${family.currency}</div><div class="n">${$('reportMonth').value}</div></div>`;
-  if(isAdmin()){
+  if(can('canViewBudget')){
     const pct=budgetTotal?Math.min(100,total/budgetTotal*100):0;
     html+=`<div class="metric"><div class="k">الميزانية</div><div class="v">${money(budgetTotal)} ${family.currency}</div><div class="bar"><span style="width:${pct}%"></span></div><div class="n">المستخدم ${pct.toFixed(0)}%</div></div><div class="metric"><div class="k">المتبقي</div><div class="v">${money(budgetTotal-total)} ${family.currency}</div><div class="n">تقريبي</div></div>`;
   }else{
@@ -528,48 +27,48 @@ function renderReports(){
 function renderSettings(){
   $('profileName').value=currentMember.name||currentUser?.displayName||'';
   $('profileEmail').value=currentMember.email||currentUser?.email||'';
-  $('profileRole').value=isAdmin()?'حساب رئيسي':'حساب ثانوي';
+  $('profileRole').value=ROLE_LABELS[currentMember.role]||ROLE_LABELS.member;
   $('familyName').value=family.name||'';
   $('familySize').value=family.familySize||5;
   $('currency').value=family.currency||'ر.س';
   if($('budgetTotal')){$('budgetTotal').value=family.budget?.total||0;$('budgetGroceries').value=family.budget?.groceries||0;$('budgetBills').value=family.budget?.bills||0;$('budgetOther').value=family.budget?.other||0;}
   $('familyCode').textContent=family.familyCode||'-';
-  $('membersList').innerHTML=data.members.length?data.members.map(m=>`<div class="row"><div><h3>${esc(m.name||m.email)}</h3><p>${esc(m.email||'')} | ${m.role==='owner'||m.role==='admin'?'حساب رئيسي':'حساب ثانوي'}</p></div>${isAdmin()?`<div class="actions">${m.uid!==currentUser.uid?`<button class="btn small" onclick="setMemberRole('${m.uid}','${m.role==='member'?'admin':'member'}')">${m.role==='member'?'ترقية لرئيسي':'تحويل لثانوي'}</button>`:''}</div>`:''}</div>`).join(''):`<div class="empty">لا توجد بيانات أفراد.</div>`;
+  $('membersList').innerHTML=data.members.length?data.members.map(m=>`<div class="row"><div><h3>${esc(m.name||m.email)}</h3><p>${esc(m.email||'')} | ${esc(ROLE_LABELS[m.role]||m.role)} | انضم: ${formatDate(m.joinedAt)}</p></div>${isOwner()&&m.role!=='owner'?`<div class="actions"><button class="btn small" onclick="openMemberPermissions('${m.uid}')">تعديل الصلاحيات</button></div>`:''}</div>`).join(''):`<div class="empty">لا توجد بيانات أفراد.</div>`;
 }
-
 function openModal(title, body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('show')}
 window.closeModal=()=>{$('modal').classList.remove('show');editCtx=null}
 window.openBill=(id)=>{
+  if(!requirePermission('canManageBills'))return;
   const b=id?byId(id,data.bills):{name:'',category:'الكهرباء',amount:'',period:'شهري',dueDate:todayISO(),notes:''};
   editCtx={col:'bills',id,isNew:!id};
   openModal(id?'تعديل فاتورة':'إضافة فاتورة',`<div class="grid cols2"><div><label>اسم الفاتورة</label><input id="f_name" value="${esc(b.name)}" placeholder="الكهرباء"></div><div><label>التصنيف</label><select id="f_cat">${['الكهرباء','الماء','الإنترنت','غاز','إيجار','أقساط','أخرى'].map(c=>`<option ${b.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>المبلغ</label><input id="f_amount" type="number" value="${b.amount||''}"></div><div><label>الفترة</label><select id="f_period">${['شهري','أسبوعي','سنوي'].map(c=>`<option ${b.period===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>تاريخ الاستحقاق</label><input id="f_due" type="date" value="${b.dueDate||todayISO()}"></div><div><label>ملاحظات</label><input id="f_notes" value="${esc(b.notes||'')}"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveBill()">حفظ</button></div>`);
 }
 window.saveBill=async()=>{await saveDoc('bills',{id:editCtx.id,name:v('f_name'),category:v('f_cat'),amount:num('f_amount'),period:v('f_period'),dueDate:v('f_due'),notes:v('f_notes')});closeModal();}
 window.payBill=async(id)=>{
+  if(!requirePermission('canManageBills') || !requirePermission('canManageExpenses'))return;
   const b=byId(id,data.bills); if(!b)return;
   await saveDoc('expenses',{title:'دفع فاتورة '+b.name,category:'فواتير',amount:Number(b.amount)||0,date:todayISO(),notes:b.category||'',source:'bill',sourceId:id});
   alert('تم تسجيل الدفع في المصاريف');
 }
-
 window.openItem=(id)=>{
+  if(!requirePermission('canManageCatalog'))return;
   const i=id?byId(id,data.items):{name:'',brand:'',group:'',category:'مقاضي أساسية',store:'',priceMin:'',priceMax:'',unitSize:1,unitLabel:'حبة',dailyPerPerson:'',dailyFixed:'',preferred:true,image:''};
   editCtx={col:'items',id,isNew:!id,image:i.image||''};
   openModal(id?'تعديل صنف':'إضافة صنف',`<div class="grid cols3"><div><label>اسم الصنف</label><input id="i_name" value="${esc(i.name)}" placeholder="معكرونة / رز / دجاج"></div><div><label>النوع / الشركة</label><input id="i_brand" value="${esc(i.brand||'')}" placeholder="قودي"></div><div><label>مجموعة المقارنة</label><input id="i_group" value="${esc(i.group||'')}" placeholder="معكرونة"></div><div><label>التصنيف</label><select id="i_category">${CATS.map(c=>`<option ${i.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>السعر من</label><input id="i_pmin" type="number" step="0.01" value="${i.priceMin||''}"></div><div><label>السعر إلى</label><input id="i_pmax" type="number" step="0.01" value="${i.priceMax||''}"></div><div><label>حجم العبوة</label><input id="i_size" type="number" step="0.01" value="${i.unitSize||1}"></div><div><label>وحدة العبوة</label><input id="i_unit" value="${esc(i.unitLabel||'حبة')}"></div><div><label>المتجر / مصدر السعر</label><input id="i_store" value="${esc(i.store||'')}"></div><div><label>استهلاك يومي لكل فرد</label><input id="i_dpp" type="number" step="0.001" value="${i.dailyPerPerson||''}"></div><div><label>استهلاك يومي ثابت للبيت</label><input id="i_dfixed" type="number" step="0.001" value="${i.dailyFixed||''}"></div><div><label>صورة الصنف</label><input id="i_img" type="file" accept="image/*" onchange="readImage(event)"></div></div><div class="chips" style="margin:12px 0"><span class="chip ${i.preferred?'active':''}" id="i_pref" onclick="this.classList.toggle('active')">صنف معتمد</span></div><div class="actions"><button class="btn primary" onclick="saveItem()">حفظ</button></div>`);
 }
 window.readImage=(ev)=>{const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{editCtx.image=r.result}; r.readAsDataURL(f)}
 window.saveItem=async()=>{await saveDoc('items',{id:editCtx.id,name:v('i_name'),brand:v('i_brand'),group:v('i_group')||v('i_name'),category:v('i_category'),store:v('i_store'),priceMin:num('i_pmin'),priceMax:num('i_pmax')||num('i_pmin'),unitSize:num('i_size')||1,unitLabel:v('i_unit')||'وحدة',dailyPerPerson:num('i_dpp'),dailyFixed:num('i_dfixed'),preferred:$('i_pref').classList.contains('active'),image:editCtx.image||''});closeModal();}
-
-window.openShopping=()=>{openModal('إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item">${data.items.map(i=>`<option value="${i.id}">${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" value="1"></div><div style="grid-column:1/-1"><label>ملاحظة</label><input id="s_note" placeholder="خذ الأرخص / الحجم الكبير"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">إضافة</button></div>`)}
+window.openShopping=()=>{if(!requirePermission('canManageShopping'))return;openModal('إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item">${data.items.map(i=>`<option value="${i.id}">${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" value="1"></div><div style="grid-column:1/-1"><label>ملاحظة</label><input id="s_note" placeholder="خذ الأرخص / الحجم الكبير"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">إضافة</button></div>`)}
 window.saveShopping=async()=>{await saveDoc('shopping',{itemId:v('s_item'),qty:num('s_qty')||1,note:v('s_note'),done:false});closeModal();}
-window.addToShopping=async(id)=>{await saveDoc('shopping',{itemId:id,qty:1,note:'',done:false})}
-window.buildRoutineList=async()=>{for(const i of data.items.filter(x=>x.preferred)){if(!data.shopping.some(s=>s.itemId===i.id&&!s.done))await saveDoc('shopping',{itemId:i.id,qty:1,note:'',done:false})}}
-window.toggleBought=async(id)=>{const s=byId(id,data.shopping); if(s)await saveDoc('shopping',{...s,done:!s.done})}
+window.addToShopping=async(id)=>{if(!requirePermission('canManageShopping'))return;await saveDoc('shopping',{itemId:id,qty:1,note:'',done:false})}
+window.buildRoutineList=async()=>{if(!requirePermission('canManageShopping'))return;for(const i of data.items.filter(x=>x.preferred)){if(!data.shopping.some(s=>s.itemId===i.id&&!s.done))await saveDoc('shopping',{itemId:i.id,qty:1,note:'',done:false})}}
+window.toggleBought=async(id)=>{if(!requirePermission('canManageShopping'))return;const s=byId(id,data.shopping); if(s)await saveDoc('shopping',{...s,done:!s.done})}
 window.markShoppingBought=(id)=>{
+  if(!requirePermission('canManageShopping') || !requirePermission('canManageExpenses'))return;
   const s=byId(id,data.shopping), i=byId(s?.itemId,data.items); if(!s||!i)return;
   openModal('تسجيل شراء فعلي',`<div class="grid cols2"><div><label>الصنف</label><input value="${esc(i.name)}" disabled></div><div><label>المبلغ الفعلي</label><input id="buyAmount" type="number" value="${avg(i.priceMin,i.priceMax)*s.qty}"></div><div><label>التصنيف</label><select id="buyCat"><option>مقاضي</option><option>منظفات</option><option>أخرى</option></select></div><div><label>التاريخ</label><input id="buyDate" type="date" value="${todayISO()}"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveBoughtExpense('${id}')">تسجيل</button></div>`);
 }
 window.saveBoughtExpense=async(id)=>{const s=byId(id,data.shopping),i=byId(s.itemId,data.items);await saveDoc('expenses',{title:'شراء '+(i?.name||'صنف'),category:v('buyCat'),amount:num('buyAmount'),date:v('buyDate'),source:'shopping',sourceId:id});await saveDoc('shopping',{...s,done:true});closeModal();}
-
 function groceryPicker(selected=[]){
   const selectedMap={}; selected.forEach(x=>selectedMap[x.itemId]=x);
   return `<div class="grid" style="max-height:330px;overflow:auto;border:1px solid var(--line);border-radius:18px;padding:10px">${data.items.map(i=>{const s=selectedMap[i.id]||{};return `<div class="row" style="box-shadow:none"><div class="row-main">${thumb(i)}<div><label style="display:flex;gap:8px;align-items:center;margin:0"><input type="checkbox" class="taskItemCheck" data-id="${i.id}" ${s.itemId?'checked':''} style="width:auto"> ${esc(i.name)} <span class="badge">${money(i.priceMin)}-${money(i.priceMax)} ${family.currency}</span></label></div></div><div style="width:110px"><input type="number" class="taskItemQty" data-id="${i.id}" value="${s.qty||1}" min="1"></div></div>`}).join('')}</div>`;
@@ -579,20 +78,47 @@ function readTaskItems(){
 }
 window.openTask=(id)=>{
   const t=id?byId(id,data.tasks):{title:'جيب مقاضي اليوم',assignedTo:'',dueDate:todayISO(),details:'',status:'open',items:[]};
+  if(id?!canEditTask(t):!can('canCreateTasks'))return deny();
   editCtx={col:'tasks',id,isNew:!id};
-  openModal(id?'تعديل مهمة':'إرسال مهمة',`<div class="grid cols2"><div><label>عنوان المهمة</label><input id="t_title" value="${esc(t.title)}"></div><div><label>إلى</label><select id="t_to"><option value="">اختر</option>${data.members.map(m=>`<option ${t.assignedTo===(m.name||m.email)?'selected':''}>${esc(m.name||m.email)}</option>`).join('')}</select></div><div><label>التاريخ</label><input id="t_due" type="date" value="${t.dueDate||todayISO()}"></div><div><label>الحالة</label><select id="t_status"><option value="open" ${t.status!=='done'?'selected':''}>مفتوحة</option><option value="done" ${t.status==='done'?'selected':''}>منجزة</option></select></div><div style="grid-column:1/-1"><label>اختر المقاضي المطلوبة في المهمة</label>${groceryPicker(t.items||[])}</div><div style="grid-column:1/-1"><label>ملاحظات إضافية</label><textarea id="t_details">${esc(t.details||'')}</textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn secondary" onclick="selectShoppingForTask()">تحديد قائمة الشراء الحالية</button><button class="btn primary" onclick="saveTask()">حفظ المهمة</button></div>`);
+  const lockAssignee=id&&!can('canManageTasks');
+  openModal(id?'تعديل مهمة':'إرسال مهمة',`<div class="grid cols2"><div><label>عنوان المهمة</label><input id="t_title" value="${esc(t.title)}"></div><div><label>إلى</label><select id="t_to" ${lockAssignee?'disabled':''}><option value="">اختر</option>${data.members.map(m=>`<option value="${m.uid}" ${(t.assignedToUid===m.uid||(!t.assignedToUid&&t.assignedTo===(m.name||m.email)))?'selected':''}>${esc(m.name||m.email)}</option>`).join('')}</select></div><div><label>التاريخ</label><input id="t_due" type="date" value="${t.dueDate||todayISO()}"></div><div><label>الحالة</label><select id="t_status"><option value="open" ${t.status!=='done'?'selected':''}>مفتوحة</option><option value="done" ${t.status==='done'?'selected':''}>منجزة</option></select></div><div style="grid-column:1/-1"><label>اختر المقاضي المطلوبة في المهمة</label>${groceryPicker(t.items||[])}</div><div style="grid-column:1/-1"><label>ملاحظات إضافية</label><textarea id="t_details">${esc(t.details||'')}</textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn secondary" onclick="selectShoppingForTask()">تحديد قائمة الشراء الحالية</button><button class="btn primary" onclick="saveTask()">حفظ المهمة</button></div>`);
 }
 window.selectShoppingForTask=()=>{data.shopping.filter(s=>!s.done).forEach(s=>{const c=document.querySelector(`.taskItemCheck[data-id="${s.itemId}"]`), q=document.querySelector(`.taskItemQty[data-id="${s.itemId}"]`); if(c)c.checked=true;if(q)q.value=s.qty||1;});}
-window.saveTask=async()=>{await saveDoc('tasks',{id:editCtx.id,title:v('t_title'),assignedTo:v('t_to'),dueDate:v('t_due'),details:v('t_details'),status:v('t_status'),items:readTaskItems()});closeModal();}
-window.toggleTask=async(id)=>{const t=byId(id,data.tasks); if(t)await saveDoc('tasks',{...t,status:t.status==='done'?'open':'done'})}
-
+window.saveTask=async()=>{
+  const old=editCtx.id?byId(editCtx.id,data.tasks):null;
+  if(old?!canEditTask(old):!can('canCreateTasks'))return deny();
+  const assignedToUid=old&&!can('canManageTasks')?old.assignedToUid:v('t_to'), assigned=data.members.find(m=>m.uid===assignedToUid);
+  const task={id:editCtx.id,title:v('t_title'),assignedToUid,assignedToName:assigned?.name||assigned?.email||'',assignedTo:assigned?.name||assigned?.email||'',dueDate:v('t_due'),details:v('t_details'),status:v('t_status'),items:readTaskItems()};
+  if(DEMO){
+    task.createdBy=old?.createdBy||currentUser.uid;
+    await saveTaskRecord(task);
+  }else if(task.id){
+    const id=task.id;delete task.id;await setDoc(doc(fs,'families',currentFamilyId,'tasks',id),task,{merge:true});
+  }else{
+    delete task.id;
+    await addDoc(collection(fs,'families',currentFamilyId,'tasks'),{...task,createdBy:currentUser.uid,createdAt:serverTimestamp()});
+  }
+  closeModal();
+}
+async function saveTaskRecord(task){
+  if(!task.id)task.id=uid();
+  const idx=data.tasks.findIndex(x=>x.id===task.id);idx>-1?data.tasks[idx]={...data.tasks[idx],...task}:data.tasks.push(task);
+  persistDemo();render();
+}
+window.toggleTask=async(id)=>{
+  const t=byId(id,data.tasks);if(!t)return;
+  if(!canEditTask(t))return deny();
+  const update={status:t.status==='done'?'open':'done'};
+  if(DEMO){Object.assign(t,update);persistDemo();render();return}
+  await setDoc(doc(fs,'families',currentFamilyId,'tasks',id),update,{merge:true});
+}
 window.openExpense=(id)=>{
+  if(!requirePermission('canManageExpenses'))return;
   const e=id?byId(id,data.expenses):{title:'',category:'مقاضي',amount:'',date:todayISO(),notes:''};
   editCtx={col:'expenses',id,isNew:!id};
   openModal(id?'تعديل مصروف':'تسجيل مصروف',`<div class="grid cols2"><div><label>العنوان</label><input id="x_title" value="${esc(e.title)}" placeholder="مقاضي الأسبوع"></div><div><label>التصنيف</label><select id="x_cat">${['فواتير','مقاضي','منظفات','أخرى'].map(c=>`<option ${e.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>المبلغ</label><input id="x_amount" type="number" value="${e.amount||''}"></div><div><label>التاريخ</label><input id="x_date" type="date" value="${e.date||todayISO()}"></div><div style="grid-column:1/-1"><label>ملاحظات</label><input id="x_notes" value="${esc(e.notes||'')}"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveExpense()">حفظ</button></div>`);
 }
 window.saveExpense=async()=>{await saveDoc('expenses',{id:editCtx.id,title:v('x_title'),category:v('x_cat'),amount:num('x_amount'),date:v('x_date'),notes:v('x_notes')});closeModal();}
-
 window.saveProfile=async()=>{
   const name=v('profileName'); currentMember.name=name;
   if(DEMO){const me=data.members.find(m=>m.uid===currentUser.uid); if(me)me.name=name; persistDemo();return;}
@@ -600,23 +126,56 @@ window.saveProfile=async()=>{
   await setDoc(doc(fs,'users',currentUser.uid),{name},{merge:true});
 }
 window.saveFamilySettings=async()=>{
-  if(!isAdmin() && ['budgetTotal','budgetGroceries','budgetBills','budgetOther'].some(id=>document.activeElement?.id===id)) return;
-  const obj={name:v('familyName'),familySize:num('familySize')||1,currency:v('currency')||'ر.س'};
-  if(isAdmin())obj.budget={total:num('budgetTotal'),groceries:num('budgetGroceries'),bills:num('budgetBills'),other:num('budgetOther')};
+  const editingBudget=['budgetTotal','budgetGroceries','budgetBills','budgetOther'].includes(document.activeElement?.id);
+  if(editingBudget && !can('canEditBudget'))return deny();
+  if(!editingBudget && !isOwner())return deny();
+  const obj=editingBudget
+    ?{budget:{total:num('budgetTotal'),groceries:num('budgetGroceries'),bills:num('budgetBills'),other:num('budgetOther')}}
+    :{name:v('familyName'),familySize:num('familySize')||1,currency:v('currency')||'ر.س'};
   family={...family,...obj};
   if(DEMO){persistDemo();render();return;}
-  await setDoc(doc(fs,'families',currentFamilyId),obj,{merge:true});
+  try{await setDoc(doc(fs,'families',currentFamilyId),obj,{merge:true})}
+  catch(e){alert(friendlyError(e))}
 }
-window.setMemberRole=async(uid,role)=>{
-  if(!isAdmin())return alert('هذه الصلاحية للحساب الرئيسي فقط');
-  if(DEMO){const m=data.members.find(x=>x.uid===uid); if(m)m.role=role; persistDemo();render();return;}
-  const m=byId(uid,data.members) || data.members.find(x=>x.uid===uid);
-  await setDoc(doc(fs,'families',currentFamilyId,'members',uid),{role},{merge:true});
-  await setDoc(doc(fs,'users',uid),{role},{merge:true});
+window.openMemberPermissions=uid=>{
+  if(!isOwner())return deny();
+  const member=data.members.find(m=>m.uid===uid);
+  if(!member || member.role==='owner')return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
+  editCtx={memberUid:uid};
+  const checks=Object.entries(PERMISSION_LABELS).map(([key,label])=>`<label style="display:flex;align-items:center;gap:8px;margin:0"><input id="perm_${key}" type="checkbox" ${member.permissions?.[key]?'checked':''} style="width:auto"> ${label}</label>`).join('');
+  openModal('تعديل صلاحيات العضو',`<div class="grid"><div><label>العضو</label><input value="${esc(member.name||member.email)}" disabled></div><div><label>الدور</label><select id="memberRole" onchange="applyRoleDefaults()"><option value="owner" disabled>owner - مالك العائلة (محمي)</option><option value="admin" ${member.role==='admin'?'selected':''}>admin - حساب رئيسي مساعد</option><option value="member" ${member.role==='member'?'selected':''}>member - عضو</option><option value="viewer" ${member.role==='viewer'?'selected':''}>viewer - مشاهدة فقط</option></select></div><div><label>الصلاحيات</label><div class="grid cols2" style="border:1px solid var(--line);border-radius:18px;padding:14px">${checks}</div></div><div class="actions"><button class="btn primary" onclick="saveMemberPermissions()">حفظ</button></div></div>`);
+}
+window.applyRoleDefaults=()=>{
+  const defaults=permissionsForRole(v('memberRole'));
+  Object.keys(PERMISSION_LABELS).forEach(key=>{const input=$('perm_'+key);if(input)input.checked=defaults[key]===true});
+}
+window.saveMemberPermissions=async()=>{
+  if(!isOwner())return deny();
+  const uid=editCtx?.memberUid, member=data.members.find(m=>m.uid===uid);
+  if(!member || member.role==='owner' || uid===currentUser.uid)return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
+  const role=v('memberRole');
+  if(!['admin','member','viewer'].includes(role))return alert('الدور غير صحيح');
+  const permissions={};
+  Object.keys(PERMISSION_LABELS).forEach(key=>permissions[key]=$('perm_'+key)?.checked===true);
+  try{
+    if(DEMO){
+      member.role=role;member.permissions=permissions;persistDemo();render();
+    }else{
+      const batch=writeBatch(fs);
+      batch.set(doc(fs,'families',currentFamilyId,'members',uid),{role,permissions},{merge:true});
+      batch.set(doc(fs,'users',uid),{role},{merge:true});
+      await batch.commit();
+    }
+    closeModal();
+    alert('تم تحديث صلاحيات العضو');
+  }catch(e){
+    console.error(e);
+    alert(friendlyError(e));
+  }
 }
 window.removeDoc=removeDoc;
-
 window.seedDefaultGroceries=async()=>{
+  if(!requirePermission('canManageCatalog'))return;
   const samples=[
     ['رز','أبو كاس','رز','مقاضي أساسية',38,48,10,'كجم',0.12,0,'سعر تقريبي'],
     ['معكرونة','نوع اقتصادي','معكرونة','مقاضي أساسية',3.5,5,0.4,'كجم',0.08,0,'سعر تقريبي'],
@@ -633,7 +192,6 @@ window.seedDefaultGroceries=async()=>{
     }
   }
 }
-
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 </script>
 </body>
