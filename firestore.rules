@@ -1,3 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function memberPath(familyId, uid) {
+      return /databases/$(database)/documents/families/$(familyId)/members/$(uid);
+    }
+
+    function isMember(familyId) {
+      return signedIn() && exists(memberPath(familyId, request.auth.uid));
+    }
+
+    function member(familyId) {
+      return get(memberPath(familyId, request.auth.uid)).data;
+    }
+
+    function isOwner(familyId) {
+      return isMember(familyId) && member(familyId).role == 'owner';
+    }
+
+    function hasPermission(familyId, permission) {
+      return isOwner(familyId) ||
+        (isMember(familyId) &&
+         member(familyId).permissions is map &&
+         member(familyId).permissions[permission] == true);
+    }
+
+    function ownerPermissions() {
+      return {
+        canViewBudget: true,
+        canEditBudget: true,
+        canManageMembers: true,
+        canManageCatalog: true,
+        canManageBills: true,
+        canManageExpenses: true,
+        canManageTasks: true,
+        canCreateTasks: true,
+        canEditOwnTasks: true,
+        canManageShopping: true,
+        canViewReports: true
+      };
+    }
+
+    function memberPermissions() {
+      return {
+        canViewBudget: false,
+        canEditBudget: false,
         canManageMembers: false,
         canManageCatalog: false,
         canManageBills: false,
@@ -9,6 +59,7 @@
         canViewReports: true
       };
     }
+
     function validPermissions(value) {
       return value is map &&
         value.keys().hasOnly([
@@ -29,15 +80,18 @@
         value.canManageShopping is bool &&
         value.canViewReports is bool;
     }
+
     function validRole(role) {
       return role in ['owner', 'admin', 'member', 'viewer'];
     }
+
     function validJoinCode(familyId, code) {
       return code is string &&
         exists(/databases/$(database)/documents/familyJoinCodes/$(code)) &&
         get(/databases/$(database)/documents/familyJoinCodes/$(code)).data.active == true &&
         get(/databases/$(database)/documents/familyJoinCodes/$(code)).data.familyId == familyId;
     }
+
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow create: if signedIn() &&
@@ -65,6 +119,7 @@
       );
       allow delete: if false;
     }
+
     match /familyJoinCodes/{code} {
       allow get: if signedIn();
       allow list: if false;
@@ -82,6 +137,7 @@
       allow delete: if signedIn() &&
         resource.data.ownerUid == request.auth.uid;
     }
+
     match /families/{familyId} {
       allow read: if isMember(familyId);
       allow create: if signedIn() &&
@@ -90,8 +146,10 @@
         (hasPermission(familyId, 'canEditBudget') &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['budget']));
       allow delete: if isOwner(familyId);
+
       match /members/{uid} {
         allow read: if isMember(familyId);
+
         allow create: if signedIn() && (
           (
             request.auth.uid == uid &&
@@ -107,6 +165,7 @@
             validJoinCode(familyId, request.resource.data.joinedWithCode)
           )
         );
+
         allow update: if signedIn() && (
           (
             request.auth.uid == uid &&
@@ -121,27 +180,33 @@
             validPermissions(request.resource.data.permissions)
           )
         );
+
         allow delete: if signedIn() &&
           request.auth.uid != uid &&
           (isOwner(familyId) || hasPermission(familyId, 'canManageMembers')) &&
           resource.data.role != 'owner';
       }
+
       match /bills/{billId} {
         allow read: if isMember(familyId);
         allow create, update, delete: if hasPermission(familyId, 'canManageBills');
       }
+
       match /items/{itemId} {
         allow read: if isMember(familyId);
         allow create, update, delete: if hasPermission(familyId, 'canManageCatalog');
       }
+
       match /shopping/{shoppingId} {
         allow read: if isMember(familyId);
         allow create, update, delete: if hasPermission(familyId, 'canManageShopping');
       }
+
       match /expenses/{expenseId} {
         allow read: if isMember(familyId);
         allow create, update, delete: if hasPermission(familyId, 'canManageExpenses');
       }
+
       match /tasks/{taskId} {
         allow read: if isMember(familyId);
         allow create: if hasPermission(familyId, 'canCreateTasks') &&
