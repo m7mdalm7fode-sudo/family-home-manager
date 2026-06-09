@@ -1,59 +1,158 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function signedIn() {
-      return request.auth != null;
+        canManageMembers: false,
+        canManageCatalog: false,
+        canManageBills: false,
+        canManageExpenses: false,
+        canManageTasks: false,
+        canCreateTasks: true,
+        canEditOwnTasks: true,
+        canManageShopping: true,
+        canViewReports: true
+      };
     }
-
-    function isFamilyMember(familyId) {
-      return signedIn()
-        && exists(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid));
+    function validPermissions(value) {
+      return value is map &&
+        value.keys().hasOnly([
+          'canViewBudget', 'canEditBudget', 'canManageMembers',
+          'canManageCatalog', 'canManageBills', 'canManageExpenses',
+          'canManageTasks', 'canCreateTasks', 'canEditOwnTasks',
+          'canManageShopping', 'canViewReports'
+        ]) &&
+        value.canViewBudget is bool &&
+        value.canEditBudget is bool &&
+        value.canManageMembers is bool &&
+        value.canManageCatalog is bool &&
+        value.canManageBills is bool &&
+        value.canManageExpenses is bool &&
+        value.canManageTasks is bool &&
+        value.canCreateTasks is bool &&
+        value.canEditOwnTasks is bool &&
+        value.canManageShopping is bool &&
+        value.canViewReports is bool;
     }
-
-    function myRole(familyId) {
-      return get(/databases/$(database)/documents/families/$(familyId)/members/$(request.auth.uid)).data.role;
+    function validRole(role) {
+      return role in ['owner', 'admin', 'member', 'viewer'];
     }
-
-    function isFamilyAdmin(familyId) {
-      return isFamilyMember(familyId) && (myRole(familyId) in ['owner', 'admin']);
+    function validJoinCode(familyId, code) {
+      return code is string &&
+        exists(/databases/$(database)/documents/familyJoinCodes/$(code)) &&
+        get(/databases/$(database)/documents/familyJoinCodes/$(code)).data.active == true &&
+        get(/databases/$(database)/documents/familyJoinCodes/$(code)).data.familyId == familyId;
     }
-
-    match /users/{userId} {
-      allow read, write: if signedIn() && request.auth.uid == userId;
-    }
-
-    match /families/{familyId} {
-      allow read: if isFamilyMember(familyId);
-      allow create: if signedIn();
-      allow update: if isFamilyAdmin(familyId);
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create: if signedIn() &&
+        request.auth.uid == uid &&
+        request.resource.data.currentFamilyId is string &&
+        getAfter(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
+          request.resource.data.role;
+      allow update: if signedIn() && (
+        (
+          request.auth.uid == uid &&
+          request.resource.data.currentFamilyId is string &&
+          getAfter(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
+            request.resource.data.role
+        ) ||
+        (
+          request.auth.uid != uid &&
+          resource.data.currentFamilyId is string &&
+          request.resource.data.currentFamilyId == resource.data.currentFamilyId &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']) &&
+          (isOwner(resource.data.currentFamilyId) ||
+           hasPermission(resource.data.currentFamilyId, 'canManageMembers')) &&
+          getAfter(memberPath(resource.data.currentFamilyId, uid)).data.role ==
+            request.resource.data.role
+        )
+      );
       allow delete: if false;
-
-      match /members/{memberId} {
-        allow read: if isFamilyMember(familyId);
-        allow create: if signedIn();
-        allow update: if isFamilyAdmin(familyId) || request.auth.uid == memberId;
-        allow delete: if isFamilyAdmin(familyId);
+    }
+    match /familyJoinCodes/{code} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if signedIn() &&
+        request.resource.data.familyId is string &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/families/$(request.resource.data.familyId)).data.ownerUid ==
+          request.auth.uid;
+      allow update: if signedIn() &&
+        resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.familyId == resource.data.familyId &&
+        getAfter(/databases/$(database)/documents/families/$(request.resource.data.familyId)).data.ownerUid ==
+          request.auth.uid;
+      allow delete: if signedIn() &&
+        resource.data.ownerUid == request.auth.uid;
+    }
+    match /families/{familyId} {
+      allow read: if isMember(familyId);
+      allow create: if signedIn() &&
+        request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isOwner(familyId) ||
+        (hasPermission(familyId, 'canEditBudget') &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['budget']));
+      allow delete: if isOwner(familyId);
+      match /members/{uid} {
+        allow read: if isMember(familyId);
+        allow create: if signedIn() && (
+          (
+            request.auth.uid == uid &&
+            getAfter(/databases/$(database)/documents/families/$(familyId)).data.ownerUid ==
+              request.auth.uid &&
+            request.resource.data.role == 'owner' &&
+            request.resource.data.permissions == ownerPermissions()
+          ) ||
+          (
+            request.auth.uid == uid &&
+            request.resource.data.role == 'member' &&
+            request.resource.data.permissions == memberPermissions() &&
+            validJoinCode(familyId, request.resource.data.joinedWithCode)
+          )
+        );
+        allow update: if signedIn() && (
+          (
+            request.auth.uid == uid &&
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'email'])
+          ) ||
+          (
+            request.auth.uid != uid &&
+            (isOwner(familyId) || hasPermission(familyId, 'canManageMembers')) &&
+            resource.data.role != 'owner' &&
+            request.resource.data.role != 'owner' &&
+            validRole(request.resource.data.role) &&
+            validPermissions(request.resource.data.permissions)
+          )
+        );
+        allow delete: if signedIn() &&
+          request.auth.uid != uid &&
+          (isOwner(familyId) || hasPermission(familyId, 'canManageMembers')) &&
+          resource.data.role != 'owner';
       }
-
-      match /items/{docId} {
-        allow read, create, update, delete: if isFamilyMember(familyId);
+      match /bills/{billId} {
+        allow read: if isMember(familyId);
+        allow create, update, delete: if hasPermission(familyId, 'canManageBills');
       }
-
-      match /shopping/{docId} {
-        allow read, create, update, delete: if isFamilyMember(familyId);
+      match /items/{itemId} {
+        allow read: if isMember(familyId);
+        allow create, update, delete: if hasPermission(familyId, 'canManageCatalog');
       }
-
-      match /tasks/{docId} {
-        allow read, create, update, delete: if isFamilyMember(familyId);
+      match /shopping/{shoppingId} {
+        allow read: if isMember(familyId);
+        allow create, update, delete: if hasPermission(familyId, 'canManageShopping');
       }
-
-      match /bills/{docId} {
-        allow read, create, update, delete: if isFamilyMember(familyId);
+      match /expenses/{expenseId} {
+        allow read: if isMember(familyId);
+        allow create, update, delete: if hasPermission(familyId, 'canManageExpenses');
       }
-
-      match /expenses/{docId} {
-        allow read, create, update, delete: if isFamilyMember(familyId);
+      match /tasks/{taskId} {
+        allow read: if isMember(familyId);
+        allow create: if hasPermission(familyId, 'canCreateTasks') &&
+          request.resource.data.createdBy == request.auth.uid;
+        allow update: if hasPermission(familyId, 'canManageTasks') || (
+          hasPermission(familyId, 'canEditOwnTasks') &&
+          resource.data.assignedToUid == request.auth.uid &&
+          request.resource.data.assignedToUid == request.auth.uid &&
+          request.resource.data.createdBy == resource.data.createdBy
+        );
+        allow delete: if hasPermission(familyId, 'canManageTasks');
       }
     }
   }
