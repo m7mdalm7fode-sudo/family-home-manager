@@ -97,13 +97,13 @@ service cloud.firestore {
       allow create: if signedIn() &&
         request.auth.uid == uid &&
         request.resource.data.currentFamilyId is string &&
-        getAfter(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
+        get(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
           request.resource.data.role;
       allow update: if signedIn() && (
         (
           request.auth.uid == uid &&
           request.resource.data.currentFamilyId is string &&
-          getAfter(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
+          get(memberPath(request.resource.data.currentFamilyId, uid)).data.role ==
             request.resource.data.role
         ) ||
         (
@@ -113,7 +113,7 @@ service cloud.firestore {
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']) &&
           (isOwner(resource.data.currentFamilyId) ||
            hasPermission(resource.data.currentFamilyId, 'canManageMembers')) &&
-          getAfter(memberPath(resource.data.currentFamilyId, uid)).data.role ==
+          get(memberPath(resource.data.currentFamilyId, uid)).data.role ==
             request.resource.data.role
         )
       );
