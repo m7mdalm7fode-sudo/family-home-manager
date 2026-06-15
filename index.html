@@ -267,7 +267,7 @@
     </div>
 
     <div class="card members-section">
-      <div class="title">أفراد العائلة</div>
+      <div class="title">أفراد العائلة <span class="badge purple owner-only">إدارة الصلاحيات للمالك</span></div>
       <div class="hint owner-only">
         كود الانضمام للعائلة: <b id="familyCode"></b> — أعطه لأي فرد، وبعد دخوله يصبح حسابه عضواً تلقائياً.
         <button class="btn small secondary" style="margin-inline-start:8px" onclick="activateJoinCode()">تفعيل الكود</button>
@@ -366,7 +366,7 @@ const monthNow=()=>new Date().toISOString().slice(0,7);
 const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const permissionsForRole=role=>({...(ROLE_DEFAULTS[role]||DEFAULT_MEMBER_PERMISSIONS)});
 const normalizeMember=m=>({...m,role:m?.role||'member',permissions:{...permissionsForRole(m?.role),...(m?.permissions||{})}});
-const isOwner=()=>currentMember.role==='owner';
+const isOwner=()=>currentMember.role==='owner' || (!!currentUser?.uid && family.ownerUid===currentUser.uid);
 const isAdmin=()=>['owner','admin'].includes(currentMember.role);
 const can=permission=>isOwner() || currentMember.permissions?.[permission]===true;
 const deny=()=>{alert('ليس لديك صلاحية لتنفيذ هذا الإجراء');return false};
@@ -491,6 +491,7 @@ window.joinFamily=async()=>{
   const code=v('joinFamilyCode').toUpperCase();
   if(!code)return alert('الرجاء إدخال كود العائلة');
   if(DEMO)return demoLogin('member');
+  let joinStage='قراءة كود العائلة';
   try{
     const codeSnap=await getDoc(doc(fs,'familyJoinCodes',code));
     if(!codeSnap.exists() || codeSnap.data().active!==true)return alert('كود العائلة غير صحيح أو غير مفعل');
@@ -499,6 +500,7 @@ window.joinFamily=async()=>{
     const displayName=currentUser.displayName||currentUser.email;
     const memberRef=doc(fs,'families',fid,'members',currentUser.uid);
     let memberRole='member';
+    joinStage='إنشاء عضوية العائلة';
     try{
       await setDoc(memberRef,{
         uid:currentUser.uid,name:displayName,email:currentUser.email,role:'member',
@@ -514,6 +516,7 @@ window.joinFamily=async()=>{
         throw memberError;
       }
     }
+    joinStage='ربط الحساب بالعائلة';
     await setDoc(doc(fs,'users',currentUser.uid),{
       currentFamilyId:fid,role:memberRole,name:displayName,email:currentUser.email
     },{merge:true});
@@ -522,7 +525,7 @@ window.joinFamily=async()=>{
   }catch(e){
     console.error(e);
     const extra=e?.code==='permission-denied'?' تأكد من نشر قواعد Firestore الجديدة، ثم اضغط «تفعيل الكود» من حساب المالك.':'';
-    alert('تعذر الانضمام: '+friendlyError(e)+extra);
+    alert(`تعذر الانضمام أثناء: ${joinStage}. ${friendlyError(e)}${extra}`);
   }
 }
 function subscribeFamily(){
@@ -653,7 +656,7 @@ function render(){
   const cur=family.currency||'ر.س';
   $('homeTitle').textContent=family.name||'مدبر البيت';
   $('homeSub').textContent=`${currentUser?.email||''}`;
-  $('rolePill').textContent=ROLE_LABELS[currentMember.role]||ROLE_LABELS.member;
+  $('rolePill').textContent=isOwner()?ROLE_LABELS.owner:(ROLE_LABELS[currentMember.role]||ROLE_LABELS.member);
   renderPermissionUI();
 
   const month=monthNow();
@@ -754,13 +757,13 @@ function renderReports(){
 function renderSettings(){
   $('profileName').value=currentMember.name||currentUser?.displayName||'';
   $('profileEmail').value=currentMember.email||currentUser?.email||'';
-  $('profileRole').value=ROLE_LABELS[currentMember.role]||ROLE_LABELS.member;
+  $('profileRole').value=isOwner()?ROLE_LABELS.owner:(ROLE_LABELS[currentMember.role]||ROLE_LABELS.member);
   $('familyName').value=family.name||'';
   $('familySize').value=family.familySize||5;
   $('currency').value=family.currency||'ر.س';
   if($('budgetTotal')){$('budgetTotal').value=family.budget?.total||0;$('budgetGroceries').value=family.budget?.groceries||0;$('budgetBills').value=family.budget?.bills||0;$('budgetOther').value=family.budget?.other||0;}
   $('familyCode').textContent=family.familyCode||'-';
-  $('membersList').innerHTML=data.members.length?data.members.map(m=>`<div class="row"><div><h3>${esc(m.name||m.email)}</h3><p>${esc(m.email||'')} | ${esc(ROLE_LABELS[m.role]||m.role)} | انضم: ${formatDate(m.joinedAt)}</p></div>${isOwner()&&m.role!=='owner'?`<div class="actions"><button class="btn small" onclick="openMemberPermissions('${m.uid}')">تعديل الصلاحيات</button></div>`:''}</div>`).join(''):`<div class="empty">لا توجد بيانات أفراد.</div>`;
+  $('membersList').innerHTML=data.members.length?data.members.map(m=>{const protectedOwner=m.uid===family.ownerUid||m.role==='owner';return `<div class="row"><div><h3>${esc(m.name||m.email)} ${protectedOwner?'<span class="badge purple">المالك</span>':''}</h3><p>${esc(m.email||'')} | ${esc(protectedOwner?ROLE_LABELS.owner:(ROLE_LABELS[m.role]||m.role))} | انضم: ${formatDate(m.joinedAt)}</p></div>${isOwner()&&!protectedOwner?`<div class="actions"><button class="btn small primary" onclick="openMemberPermissions('${m.uid}')">تعديل الصلاحيات</button></div>`:''}</div>`}).join(''):`<div class="empty">لا توجد بيانات أفراد.</div>`;
 }
 
 function openModal(title, body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('show')}
@@ -873,7 +876,7 @@ window.saveFamilySettings=async()=>{
 window.openMemberPermissions=uid=>{
   if(!isOwner())return deny();
   const member=data.members.find(m=>m.uid===uid);
-  if(!member || member.role==='owner')return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
+  if(!member || member.role==='owner' || member.uid===family.ownerUid)return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
   editCtx={memberUid:uid};
   const checks=Object.entries(PERMISSION_LABELS).map(([key,label])=>`<label style="display:flex;align-items:center;gap:8px;margin:0"><input id="perm_${key}" type="checkbox" ${member.permissions?.[key]?'checked':''} style="width:auto"> ${label}</label>`).join('');
   openModal('تعديل صلاحيات العضو',`<div class="grid"><div><label>العضو</label><input value="${esc(member.name||member.email)}" disabled></div><div><label>الدور</label><select id="memberRole" onchange="applyRoleDefaults()"><option value="owner" disabled>owner - مالك العائلة (محمي)</option><option value="admin" ${member.role==='admin'?'selected':''}>admin - حساب رئيسي مساعد</option><option value="member" ${member.role==='member'?'selected':''}>member - عضو</option><option value="viewer" ${member.role==='viewer'?'selected':''}>viewer - مشاهدة فقط</option></select></div><div><label>الصلاحيات</label><div class="grid cols2" style="border:1px solid var(--line);border-radius:18px;padding:14px">${checks}</div></div><div class="actions"><button class="btn primary" onclick="saveMemberPermissions()">حفظ</button></div></div>`);
@@ -885,7 +888,7 @@ window.applyRoleDefaults=()=>{
 window.saveMemberPermissions=async()=>{
   if(!isOwner())return deny();
   const uid=editCtx?.memberUid, member=data.members.find(m=>m.uid===uid);
-  if(!member || member.role==='owner' || uid===currentUser.uid)return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
+  if(!member || member.role==='owner' || member.uid===family.ownerUid || uid===currentUser.uid)return alert('لا يمكن تعديل صلاحيات مالك العائلة الأساسي');
   const role=v('memberRole');
   if(!['admin','member','viewer'].includes(role))return alert('الدور غير صحيح');
   const permissions={};
@@ -926,7 +929,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=5',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=7',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
