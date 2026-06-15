@@ -48,7 +48,7 @@
     input:focus,select:focus,textarea:focus{border-color:#a795ff;box-shadow:0 0 0 4px rgba(101,67,216,.12)}
     .metric{background:#fff;border:1px solid var(--line);border-radius:20px;padding:14px;box-shadow:0 7px 18px rgba(16,24,40,.05)}.metric .k{font-size:12px;color:var(--muted);font-weight:900}.metric .v{font-size:23px;font-weight:950;margin-top:3px}.metric .n{font-size:12px;color:var(--muted)}
     .list{display:grid;gap:10px}.row{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px}.row:hover{border-color:#d5ccff}.row-main{display:flex;align-items:center;gap:10px;min-width:0}.row-text{min-width:0}.row h3{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.row p{font-size:12px;color:var(--muted)}
-    .thumb{width:54px;height:54px;border-radius:16px;background:#f2f4f7;display:grid;place-items:center;overflow:hidden;flex:0 0 auto}.thumb img{width:100%;height:100%;object-fit:cover}
+    .thumb{width:54px;height:54px;border-radius:16px;background:#f2f4f7;display:grid;place-items:center;overflow:hidden;flex:0 0 auto}.thumb img{width:100%;height:100%;object-fit:cover}.image-preview{width:120px;height:120px;border-radius:20px;background:#f2f4f7;border:1px solid var(--line);display:grid;place-items:center;overflow:hidden}.image-preview img{width:100%;height:100%;object-fit:cover}
     .badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:950;background:#f2f4f7;color:#475467}.badge.green{background:#e9f8f0;color:#087443}.badge.amber{background:#fff3df;color:#9a5b00}.badge.red{background:#fff0f2;color:#b42337}.badge.purple{background:#f0edff;color:#4B32A8}.badge.blue{background:#edf5ff;color:#175cd3}
     .actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.muted{color:var(--muted);font-size:13px}.hr{height:1px;background:var(--line);margin:12px 0}
     table{width:100%;border-collapse:separate;border-spacing:0;overflow:hidden;border-radius:18px;border:1px solid var(--line);font-size:13px;background:white}th{background:#f8f7ff;color:#4B32A8;text-align:right;padding:11px;border-bottom:1px solid var(--line)}td{padding:10px;border-bottom:1px solid #f0f2f6;vertical-align:top}tr:last-child td{border-bottom:none}
@@ -183,7 +183,7 @@
         </div>
       </div>
       <div class="grid cols3" style="margin-bottom:12px">
-        <div><label>بحث</label><input id="searchItems" placeholder="معكرونة، رز، دجاج..." oninput="render()"></div>
+        <div><label>بحث</label><input id="searchItems" placeholder="معكرونة، رز، دجاج..." oninput="renderItems()"></div>
         <div><label>تصنيف</label><select id="filterCat" onchange="render()"><option value="">الكل</option></select></div>
         <div><label>عرض</label><select id="filterView" onchange="render()"><option value="">كل الأصناف</option><option value="preferred">المعتمدة فقط</option><option value="cheap">الأرخص في مجموعتها</option></select></div>
       </div>
@@ -280,6 +280,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
+<script src="alamer-images.js?v=10"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -650,7 +651,19 @@ function calcDays(i, qty=1){
   if(!daily)return null; return total/daily;
 }
 function calcDaysText(i,qty=1){const d=calcDays(i,qty);return d?`${Math.max(1,Math.round(d))} يوم`:'غير محدد'}
-function thumb(i){return `<div class="thumb">${i?.image?`<img src="${i.image}" alt="">`:'🛒'}</div>`}
+function safeImageUrl(url){
+  const value=String(url||'').trim();
+  if(!value)return '';
+  if(value.startsWith('images/') || value.startsWith('./images/'))return value;
+  try{
+    const parsed=new URL(value,location.href);
+    return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';
+  }catch(e){return ''}
+}
+function thumb(i){
+  const image=safeImageUrl(i?.imageUrl||i?.image);
+  return `<div class="thumb">${image?`<img src="${esc(image)}" alt="${esc(i?.name||'صورة منتج')}" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.textContent='🛒'">`:'🛒'}</div>`;
+}
 
 function render(){
   if(!$('appView') || $('appView').classList.contains('hidden')) return;
@@ -711,10 +724,29 @@ function renderFilters(){
   const sel=$('filterCat'); if(!sel)return; const current=sel.value; const cats=[...new Set([...CATS,...data.items.map(i=>i.category).filter(Boolean)])];
   sel.innerHTML='<option value="">الكل</option>'+cats.map(c=>`<option ${current===c?'selected':''}>${esc(c)}</option>`).join('');
 }
+function normalizeSearch(value){
+  return String(value||'')
+    .normalize('NFKD')
+    .replace(/[\u064B-\u065F\u0670]/g,'')
+    .replace(/[أإآٱ]/g,'ا')
+    .replace(/ى/g,'ي')
+    .replace(/ة/g,'ه')
+    .replace(/ؤ/g,'و')
+    .replace(/ئ/g,'ي')
+    .replace(/ـ/g,'')
+    .replace(/[^\p{L}\p{N}]+/gu,' ')
+    .replace(/\s+/g,' ')
+    .trim()
+    .toLowerCase();
+}
 function renderItems(){
-  const q=($('searchItems')?.value||'').toLowerCase(),cat=$('filterCat')?.value||'',view=$('filterView')?.value||'';
+  const queryTokens=normalizeSearch($('searchItems')?.value).split(' ').filter(Boolean),cat=$('filterCat')?.value||'',view=$('filterView')?.value||'';
   const cheapIds=new Set(cheapestByGroups().map(g=>g.items[0].id));
-  const arr=data.items.filter(i=>(!q||(i.name+i.group+i.brand).toLowerCase().includes(q))&&(!cat||i.category===cat)&&(!view||(view==='preferred'?i.preferred:view==='cheap'?cheapIds.has(i.id):true)));
+  const arr=data.items.filter(i=>{
+    const searchable=normalizeSearch([i.name,i.brand,i.group,i.category,i.store].filter(Boolean).join(' '));
+    const matchesSearch=!queryTokens.length||queryTokens.every(token=>searchable.includes(token));
+    return matchesSearch&&(!cat||i.category===cat)&&(!view||(view==='preferred'?i.preferred:view==='cheap'?cheapIds.has(i.id):true));
+  });
   const manageCatalog=can('canManageCatalog'), manageShopping=can('canManageShopping');
   $('itemsList').innerHTML=arr.length?arr.map(i=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name)} ${i.preferred?'<span class="badge purple">معتمد</span>':''}</h3><p>${esc(i.category||'-')} | المجموعة: ${esc(i.group||'-')} | ${money(i.priceMin)} - ${money(i.priceMax||i.priceMin)} ${family.currency} | ${esc(i.store||'سعر تقريبي')}</p><p>يكفي تقريباً: <b>${calcDaysText(i)}</b></p></div></div><div class="actions">${manageShopping?`<button class="btn small green" onclick="addToShopping('${i.id}')">أضف للشراء</button>`:''}${manageCatalog?`<button class="btn small" onclick="openItem('${i.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('items','${i.id}')">حذف</button>`:''}</div></div>`).join(''):`<div class="empty">لا توجد أصناف.</div>`;
 }
@@ -785,12 +817,22 @@ window.payBill=async(id)=>{
 
 window.openItem=(id)=>{
   if(!requirePermission('canManageCatalog'))return;
-  const i=id?byId(id,data.items):{name:'',brand:'',group:'',category:'مقاضي أساسية',store:'',priceMin:'',priceMax:'',unitSize:1,unitLabel:'حبة',dailyPerPerson:'',dailyFixed:'',preferred:true,image:''};
-  editCtx={col:'items',id,isNew:!id,image:i.image||''};
-  openModal(id?'تعديل صنف':'إضافة صنف',`<div class="grid cols3"><div><label>اسم الصنف</label><input id="i_name" value="${esc(i.name)}" placeholder="معكرونة / رز / دجاج"></div><div><label>النوع / الشركة</label><input id="i_brand" value="${esc(i.brand||'')}" placeholder="قودي"></div><div><label>مجموعة المقارنة</label><input id="i_group" value="${esc(i.group||'')}" placeholder="معكرونة"></div><div><label>التصنيف</label><select id="i_category">${CATS.map(c=>`<option ${i.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>السعر من</label><input id="i_pmin" type="number" step="0.01" value="${i.priceMin||''}"></div><div><label>السعر إلى</label><input id="i_pmax" type="number" step="0.01" value="${i.priceMax||''}"></div><div><label>حجم العبوة</label><input id="i_size" type="number" step="0.01" value="${i.unitSize||1}"></div><div><label>وحدة العبوة</label><input id="i_unit" value="${esc(i.unitLabel||'حبة')}"></div><div><label>المتجر / مصدر السعر</label><input id="i_store" value="${esc(i.store||'')}"></div><div><label>استهلاك يومي لكل فرد</label><input id="i_dpp" type="number" step="0.001" value="${i.dailyPerPerson||''}"></div><div><label>استهلاك يومي ثابت للبيت</label><input id="i_dfixed" type="number" step="0.001" value="${i.dailyFixed||''}"></div><div><label>صورة الصنف</label><input id="i_img" type="file" accept="image/*" onchange="readImage(event)"></div></div><div class="chips" style="margin:12px 0"><span class="chip ${i.preferred?'active':''}" id="i_pref" onclick="this.classList.toggle('active')">صنف معتمد</span></div><div class="actions"><button class="btn primary" onclick="saveItem()">حفظ</button></div>`);
+  const i=id?byId(id,data.items):{name:'',brand:'',group:'',category:'مقاضي أساسية',store:'',priceMin:'',priceMax:'',unitSize:1,unitLabel:'حبة',dailyPerPerson:'',dailyFixed:'',preferred:true,imageUrl:''};
+  editCtx={col:'items',id,isNew:!id,imageUrl:i.imageUrl||(!String(i.image||'').startsWith('data:')?i.image:'')||''};
+  const preview=safeImageUrl(editCtx.imageUrl);
+  openModal(id?'تعديل صنف':'إضافة صنف',`<div class="grid cols3"><div><label>اسم الصنف</label><input id="i_name" value="${esc(i.name)}" placeholder="معكرونة / رز / دجاج"></div><div><label>النوع / الشركة</label><input id="i_brand" value="${esc(i.brand||'')}" placeholder="قودي"></div><div><label>مجموعة المقارنة</label><input id="i_group" value="${esc(i.group||'')}" placeholder="معكرونة"></div><div><label>التصنيف</label><select id="i_category">${CATS.map(c=>`<option ${i.category===c?'selected':''}>${c}</option>`).join('')}</select></div><div><label>السعر من</label><input id="i_pmin" type="number" step="0.01" value="${i.priceMin||''}"></div><div><label>السعر إلى</label><input id="i_pmax" type="number" step="0.01" value="${i.priceMax||''}"></div><div><label>حجم العبوة</label><input id="i_size" type="number" step="0.01" value="${i.unitSize||1}"></div><div><label>وحدة العبوة</label><input id="i_unit" value="${esc(i.unitLabel||'حبة')}"></div><div><label>المتجر / مصدر السعر</label><input id="i_store" value="${esc(i.store||'')}"></div><div><label>استهلاك يومي لكل فرد</label><input id="i_dpp" type="number" step="0.001" value="${i.dailyPerPerson||''}"></div><div><label>استهلاك يومي ثابت للبيت</label><input id="i_dfixed" type="number" step="0.001" value="${i.dailyFixed||''}"></div><div style="grid-column:1/-1"><label>رابط صورة WebP من مجلد images</label><input id="i_image_url" value="${esc(editCtx.imageUrl)}" placeholder="images/rice-abu-kass.webp" oninput="previewItemImage()"><p class="muted" style="margin-top:5px">ارفع الصورة إلى مجلد images في GitHub بحجم 320×320 تقريبًا، ثم ضع مسارها هنا.</p></div><div><div id="i_image_preview" class="image-preview">${preview?`<img src="${esc(preview)}" alt="">`:'🛒'}</div></div></div><div class="chips" style="margin:12px 0"><span class="chip ${i.preferred?'active':''}" id="i_pref" onclick="this.classList.toggle('active')">صنف معتمد</span></div><div class="actions"><button class="btn primary" onclick="saveItem()">حفظ</button></div>`);
 }
-window.readImage=(ev)=>{const f=ev.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{editCtx.image=r.result}; r.readAsDataURL(f)}
-window.saveItem=async()=>{await saveDoc('items',{id:editCtx.id,name:v('i_name'),brand:v('i_brand'),group:v('i_group')||v('i_name'),category:v('i_category'),store:v('i_store'),priceMin:num('i_pmin'),priceMax:num('i_pmax')||num('i_pmin'),unitSize:num('i_size')||1,unitLabel:v('i_unit')||'وحدة',dailyPerPerson:num('i_dpp'),dailyFixed:num('i_dfixed'),preferred:$('i_pref').classList.contains('active'),image:editCtx.image||''});closeModal();}
+window.previewItemImage=()=>{
+  const image=safeImageUrl(v('i_image_url'));
+  const box=$('i_image_preview');
+  if(box)box.innerHTML=image?`<img src="${esc(image)}" alt="" onerror="this.remove();this.parentElement.textContent='تعذر تحميل الصورة'">`:'🛒';
+}
+window.saveItem=async()=>{
+  const imageUrl=safeImageUrl(v('i_image_url'));
+  if(v('i_image_url')&&!imageUrl)return alert('رابط الصورة غير صحيح. استخدم images/name.webp أو رابط https.');
+  await saveDoc('items',{id:editCtx.id,name:v('i_name'),brand:v('i_brand'),group:v('i_group')||v('i_name'),category:v('i_category'),store:v('i_store'),priceMin:num('i_pmin'),priceMax:num('i_pmax')||num('i_pmin'),unitSize:num('i_size')||1,unitLabel:v('i_unit')||'وحدة',dailyPerPerson:num('i_dpp'),dailyFixed:num('i_dfixed'),preferred:$('i_pref').classList.contains('active'),imageUrl,image:''});
+  closeModal();
+}
 
 window.openShopping=()=>{if(!requirePermission('canManageShopping'))return;openModal('إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item">${data.items.map(i=>`<option value="${i.id}">${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" value="1"></div><div style="grid-column:1/-1"><label>ملاحظة</label><input id="s_note" placeholder="خذ الأرخص / الحجم الكبير"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">إضافة</button></div>`)}
 window.saveShopping=async()=>{await saveDoc('shopping',{itemId:v('s_item'),qty:num('s_qty')||1,note:v('s_note'),done:false});closeModal();}
@@ -1037,12 +1079,13 @@ window.importInvoiceItems=async()=>{
   let added=0,updated=0;
   for(const row of INVOICE_ITEMS){
     const [name,brand,group,category,priceMin,priceMax,unitSize,unitLabel]=row;
+    const imageUrl=window.ALAMER_IMAGE_MAP?.[`${name}|${brand}`]||'';
     const existing=data.items.find(i=>i.name===name&&i.brand===brand);
     if(existing){
-      await saveDoc('items',{...existing,priceMin:Math.min(Number(existing.priceMin)||priceMin,priceMin),priceMax:Math.max(Number(existing.priceMax)||Number(existing.priceMin)||priceMax,priceMax),store:'فواتير شراء فعلية - العامر',group,category,unitSize,unitLabel});
+      await saveDoc('items',{...existing,imageUrl:existing.imageUrl||imageUrl,priceMin:Math.min(Number(existing.priceMin)||priceMin,priceMin),priceMax:Math.max(Number(existing.priceMax)||Number(existing.priceMin)||priceMax,priceMax),store:'فواتير شراء فعلية - العامر',group,category,unitSize,unitLabel});
       updated++;
     }else{
-      await saveDoc('items',{name,brand,group,category,priceMin,priceMax,unitSize,unitLabel,dailyPerPerson:0,dailyFixed:0,store:'فواتير شراء فعلية - العامر',preferred:true,image:''});
+      await saveDoc('items',{name,brand,group,category,priceMin,priceMax,unitSize,unitLabel,dailyPerPerson:0,dailyFixed:0,store:'فواتير شراء فعلية - العامر',preferred:true,imageUrl,image:''});
       added++;
     }
   }
@@ -1069,7 +1112,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=8',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=10',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
