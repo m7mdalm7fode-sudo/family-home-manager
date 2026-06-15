@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>مدبر البيت | فواتير ومقاضي ومهام العائلة</title>
+  <script>
+    try{
+      const savedTheme=localStorage.getItem('family-home-theme');
+      document.documentElement.dataset.theme=savedTheme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    }catch(e){}
+  </script>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#6543D8">
   <link rel="icon" type="image/svg+xml" href="icon.svg">
@@ -13,10 +19,16 @@
       --bg:#f6f7fb;--card:#fff;--txt:#121826;--muted:#667085;--line:#e7eaf1;
       --primary:#6543D8;--primary2:#4b32a8;--green:#139A63;--amber:#E89A24;--red:#E04F5F;
       --soft:#f0edff;--soft2:#ecfdf3;--shadow:0 14px 38px rgba(16,24,40,.08);
-      --r:24px;
+      --r:24px;--page-bg:linear-gradient(180deg,#f1edff 0,#f6f7fb 320px);--input:#fff;--surface:#fff;
+    }
+    html[data-theme="dark"]{
+      color-scheme:dark;--bg:#0d1120;--card:#161b2d;--txt:#f4f1ff;--muted:#aeb6cc;
+      --line:#303750;--primary:#8266f4;--primary2:#6648da;--soft:#282342;--soft2:#15352a;
+      --shadow:0 14px 38px rgba(0,0,0,.35);--page-bg:linear-gradient(180deg,#17122d 0,#0d1120 340px);
+      --input:#111729;--surface:#161b2d;
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:linear-gradient(180deg,#f1edff 0,#f6f7fb 320px);color:var(--txt);line-height:1.55}
+    body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;background:var(--page-bg);color:var(--txt);line-height:1.55;min-height:100vh}
     button,input,select,textarea{font-family:inherit}
     .hidden{display:none!important}.app{max-width:1260px;margin:auto;padding:16px}.ltr{direction:ltr;text-align:left}
     .hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,#4b32a8,#8d6bff);color:white;border-radius:30px;padding:20px 22px;margin-bottom:14px;box-shadow:0 20px 45px rgba(101,67,216,.25);overflow:hidden;position:relative}
@@ -46,6 +58,22 @@
     .auth-wrap{min-height:100vh;display:grid;place-items:center;padding:18px}.auth-card{width:min(480px,100%);background:white;border:1px solid var(--line);border-radius:30px;padding:22px;box-shadow:var(--shadow)}.auth-logo{width:70px;height:70px;border-radius:22px;background:linear-gradient(135deg,#4b32a8,#8d6bff);display:grid;place-items:center;color:#fff;font-size:36px;margin:auto auto 12px}.center{text-align:center}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#f2f4f7;border-radius:16px;padding:5px;margin:14px 0}.auth-tabs button{background:transparent;box-shadow:none}.auth-tabs button.active{background:#fff;color:var(--primary)}
     .bar{height:11px;background:#eef1f6;border-radius:999px;overflow:hidden}.bar span{display:block;height:100%;background:linear-gradient(90deg,#139A63,#6543D8);border-radius:999px}.report-bar{display:flex;align-items:center;gap:9px;margin:8px 0}.report-bar .name{width:120px;font-size:12px;color:#475467}.report-bar .bar{flex:1}.report-bar .amount{width:110px;text-align:left;font-size:12px;font-weight:900}
     .guard{filter:blur(4px);user-select:none;pointer-events:none}.admin-only-note{background:#fff7e8;border:1px solid #ffd89a;color:#8a4b00;padding:12px;border-radius:18px;margin-bottom:12px;font-size:13px;font-weight:800}
+    html[data-theme="dark"] .tab,html[data-theme="dark"] .row,html[data-theme="dark"] .metric,
+    html[data-theme="dark"] .auth-card,html[data-theme="dark"] .sheet,html[data-theme="dark"] table,
+    html[data-theme="dark"] input,html[data-theme="dark"] select,html[data-theme="dark"] textarea{
+      background:var(--surface);color:var(--txt);border-color:var(--line)
+    }
+    html[data-theme="dark"] label,html[data-theme="dark"] .tab{color:#c7cde0}
+    html[data-theme="dark"] .tab.active{background:var(--primary);color:#fff}
+    html[data-theme="dark"] th{background:#211c3a;color:#cfc4ff}
+    html[data-theme="dark"] .hint{background:#211c3a;border-color:#4b3f78;color:#d4caff}
+    html[data-theme="dark"] .empty{background:#121729;border-color:#46506a;color:var(--muted)}
+    html[data-theme="dark"] .btn.secondary,html[data-theme="dark"] .close{background:#22293c;color:#f4f1ff;border-color:var(--line)}
+    html[data-theme="dark"] .btn:not(.primary):not(.green):not(.red):not(.amber):not(.ghost){background:#22293c;color:#f4f1ff}
+    html[data-theme="dark"] .btn.red{background:#3b1e29;color:#ffb4c0}
+    html[data-theme="dark"] .admin-only-note{background:#392d19;border-color:#70572b;color:#ffd38a}
+    html[data-theme="dark"] .auth-tabs,html[data-theme="dark"] .thumb{background:#101526}
+    html[data-theme="dark"] .auth-tabs button.active{background:#252c42;color:#bbaeff}
     @media(max-width:980px){.nav{grid-template-columns:repeat(4,1fr)}.cols2,.cols3,.cols4{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero h1{font-size:23px}.app{padding:12px}.row{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start;width:100%}}
     @media(max-width:520px){.nav{grid-template-columns:repeat(2,1fr)}.tab{font-size:12px}.hero-actions{width:100%;justify-content:flex-start}.metric .v{font-size:20px}}
   </style>
@@ -100,6 +128,7 @@
     </div>
     <div class="hero-actions">
       <span class="role-pill" id="rolePill">حساب</span>
+      <button class="btn ghost icon" id="themeToggle" onclick="toggleTheme()" title="تبديل المظهر">🌙</button>
       <button class="btn ghost icon" onclick="showPage('settings')" title="الإعدادات">⚙️</button>
       <button class="btn ghost icon" onclick="logout()" title="تسجيل خروج">🚪</button>
     </div>
@@ -344,6 +373,21 @@ const deny=()=>{alert('ليس لديك صلاحية لتنفيذ هذا الإج
 const requirePermission=permission=>can(permission)||deny();
 const taskAssignedToCurrent=t=>t?.assignedToUid===currentUser?.uid || (DEMO && !t?.assignedToUid && [currentMember.name,currentMember.email,currentUser?.displayName,currentUser?.email].includes(t?.assignedTo));
 const canEditTask=t=>can('canManageTasks') || (can('canEditOwnTasks') && taskAssignedToCurrent(t));
+const THEME_KEY='family-home-theme';
+function applyTheme(theme){
+  document.documentElement.dataset.theme=theme;
+  const button=$('themeToggle');
+  if(button){
+    button.textContent=theme==='dark'?'☀️':'🌙';
+    button.title=theme==='dark'?'تفعيل الوضع الفاتح':'تفعيل الوضع الداكن';
+  }
+}
+window.toggleTheme=()=>{
+  const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';
+  localStorage.setItem(THEME_KEY,theme);
+  applyTheme(theme);
+}
+applyTheme(document.documentElement.dataset.theme||'light');
 const formatDate=value=>{
   if(!value)return '-';
   const date=value.toDate?value.toDate():new Date(value);
@@ -435,8 +479,8 @@ window.createFamily=async()=>{
     batch.set(doc(fs,'families',id),{name,familySize:5,currency:'ر.س',familyCode:code,budget:{total:0,groceries:0,bills:0,other:0},createdAt:serverTimestamp(),ownerUid:currentUser.uid});
     batch.set(doc(fs,'familyJoinCodes',code),{familyId:id,familyName:name,ownerUid:currentUser.uid,active:true,createdAt:serverTimestamp()});
     batch.set(doc(fs,'families',id,'members',currentUser.uid),{uid:currentUser.uid,name:displayName,email:currentUser.email,role:'owner',permissions:{...DEFAULT_OWNER_PERMISSIONS},joinedAt:serverTimestamp()});
-    batch.set(doc(fs,'users',currentUser.uid),{currentFamilyId:id,role:'owner',name:displayName,email:currentUser.email},{merge:true});
     await batch.commit();
+    await setDoc(doc(fs,'users',currentUser.uid),{currentFamilyId:id,role:'owner',name:displayName,email:currentUser.email},{merge:true});
     await loadUserFamily();
   }catch(e){
     console.error(e);
@@ -453,13 +497,26 @@ window.joinFamily=async()=>{
     const fid=codeSnap.data().familyId;
     if(!fid)return alert('كود العائلة غير صحيح أو غير مفعل');
     const displayName=currentUser.displayName||currentUser.email;
-    const batch=writeBatch(fs);
-    batch.set(doc(fs,'families',fid,'members',currentUser.uid),{
-      uid:currentUser.uid,name:displayName,email:currentUser.email,role:'member',
-      permissions:{...DEFAULT_MEMBER_PERMISSIONS},joinedWithCode:code,joinedAt:serverTimestamp()
-    });
-    batch.set(doc(fs,'users',currentUser.uid),{currentFamilyId:fid,role:'member',name:displayName,email:currentUser.email},{merge:true});
-    await batch.commit();
+    const memberRef=doc(fs,'families',fid,'members',currentUser.uid);
+    let memberRole='member';
+    try{
+      await setDoc(memberRef,{
+        uid:currentUser.uid,name:displayName,email:currentUser.email,role:'member',
+        permissions:{...DEFAULT_MEMBER_PERMISSIONS},joinedWithCode:code,joinedAt:serverTimestamp()
+      });
+    }catch(memberError){
+      // A previous attempt may have created the membership before the user profile write failed.
+      try{
+        const existingMember=await getDoc(memberRef);
+        if(!existingMember.exists())throw memberError;
+        memberRole=existingMember.data().role||'member';
+      }catch(e){
+        throw memberError;
+      }
+    }
+    await setDoc(doc(fs,'users',currentUser.uid),{
+      currentFamilyId:fid,role:memberRole,name:displayName,email:currentUser.email
+    },{merge:true});
     await loadUserFamily();
     alert('تم الانضمام للعائلة بنجاح');
   }catch(e){
@@ -837,10 +894,8 @@ window.saveMemberPermissions=async()=>{
     if(DEMO){
       member.role=role;member.permissions=permissions;persistDemo();render();
     }else{
-      const batch=writeBatch(fs);
-      batch.set(doc(fs,'families',currentFamilyId,'members',uid),{role,permissions},{merge:true});
-      batch.set(doc(fs,'users',uid),{role},{merge:true});
-      await batch.commit();
+      await setDoc(doc(fs,'families',currentFamilyId,'members',uid),{role,permissions},{merge:true});
+      await setDoc(doc(fs,'users',uid),{role},{merge:true});
     }
     closeModal();
     alert('تم تحديث صلاحيات العضو');
@@ -871,7 +926,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=4',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=5',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
