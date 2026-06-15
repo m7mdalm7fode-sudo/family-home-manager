@@ -18,7 +18,11 @@ service cloud.firestore {
     }
 
     function isOwner(familyId) {
-      return isMember(familyId) && member(familyId).role == 'owner';
+      return signedIn() && (
+        get(/databases/$(database)/documents/families/$(familyId)).data.ownerUid ==
+          request.auth.uid ||
+        (isMember(familyId) && member(familyId).role == 'owner')
+      );
     }
 
     function hasPermission(familyId, permission) {
@@ -85,6 +89,21 @@ service cloud.firestore {
       return role in ['owner', 'admin', 'member', 'viewer'];
     }
 
+    function validNewMemberPermissions(value) {
+      return validPermissions(value) &&
+        value.canViewBudget == false &&
+        value.canEditBudget == false &&
+        value.canManageMembers == false &&
+        value.canManageCatalog == false &&
+        value.canManageBills == false &&
+        value.canManageExpenses == false &&
+        value.canManageTasks == false &&
+        value.canCreateTasks == true &&
+        value.canEditOwnTasks == true &&
+        value.canManageShopping == true &&
+        value.canViewReports == true;
+    }
+
     function validJoinCode(familyId, code) {
       return code is string &&
         exists(/databases/$(database)/documents/familyJoinCodes/$(code)) &&
@@ -148,7 +167,8 @@ service cloud.firestore {
       allow delete: if isOwner(familyId);
 
       match /members/{uid} {
-        allow read: if isMember(familyId);
+        allow read: if isMember(familyId) ||
+          (signedIn() && request.auth.uid == uid);
 
         allow create: if signedIn() && (
           (
@@ -161,7 +181,8 @@ service cloud.firestore {
           (
             request.auth.uid == uid &&
             request.resource.data.role == 'member' &&
-            request.resource.data.permissions == memberPermissions() &&
+            request.resource.data.uid == request.auth.uid &&
+            validNewMemberPermissions(request.resource.data.permissions) &&
             validJoinCode(familyId, request.resource.data.joinedWithCode)
           )
         );
@@ -174,6 +195,7 @@ service cloud.firestore {
           (
             request.auth.uid != uid &&
             (isOwner(familyId) || hasPermission(familyId, 'canManageMembers')) &&
+            uid != get(/databases/$(database)/documents/families/$(familyId)).data.ownerUid &&
             resource.data.role != 'owner' &&
             request.resource.data.role != 'owner' &&
             validRole(request.resource.data.role) &&
@@ -184,6 +206,7 @@ service cloud.firestore {
         allow delete: if signedIn() &&
           request.auth.uid != uid &&
           (isOwner(familyId) || hasPermission(familyId, 'canManageMembers')) &&
+          uid != get(/databases/$(database)/documents/families/$(familyId)).data.ownerUid &&
           resource.data.role != 'owner';
       }
 
