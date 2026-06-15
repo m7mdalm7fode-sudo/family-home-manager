@@ -76,6 +76,44 @@
     html[data-theme="dark"] .auth-tabs button.active{background:#252c42;color:#bbaeff}
     @media(max-width:980px){.nav{grid-template-columns:repeat(4,1fr)}.cols2,.cols3,.cols4{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero h1{font-size:23px}.app{padding:12px}.row{align-items:flex-start;flex-direction:column}.actions{justify-content:flex-start;width:100%}}
     @media(max-width:520px){.nav{grid-template-columns:repeat(2,1fr)}.tab{font-size:12px}.hero-actions{width:100%;justify-content:flex-start}.metric .v{font-size:20px}}
+
+    /* Storefront-inspired responsive interface */
+    body{background-attachment:fixed}.app{max-width:1440px;padding:22px}
+    .hero{min-height:118px;padding:24px 28px;border-radius:34px;background:radial-gradient(circle at 12% 20%,rgba(255,255,255,.2),transparent 24%),linear-gradient(135deg,#4c31ad 0%,#7353e8 55%,#906dff 100%)}
+    .hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:48px;background:rgba(255,255,255,.09);left:26%;bottom:-135px;transform:rotate(28deg)}
+    .logo{width:64px;height:64px;border-radius:22px}.hero h1{font-size:30px}.hero p{font-size:14px}
+    .nav{position:sticky;top:10px;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(16px);padding:7px;border:1px solid var(--line);border-radius:22px;box-shadow:0 10px 30px rgba(16,24,40,.08)}
+    .tab{box-shadow:none;border-color:transparent;background:transparent;display:flex;align-items:center;justify-content:center;gap:7px;min-height:46px}.tab-icon{font-size:18px;line-height:1}.tab.active{box-shadow:0 8px 18px rgba(101,67,216,.25)}
+    .card{padding:20px;border-radius:28px}.title{font-size:21px;margin-bottom:16px}
+    input,select,textarea{min-height:46px;border-radius:15px;background:var(--input);color:var(--txt)}
+    .btn{min-height:42px;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.btn:hover{filter:brightness(1.03);box-shadow:0 8px 20px rgba(16,24,40,.12)}
+    .metric{min-height:118px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--soft) 35%,var(--card)));border-radius:24px}.metric .v{font-size:26px}
+    .product-panel{overflow:visible}.product-toolbar{padding:14px;background:color-mix(in srgb,var(--soft) 42%,var(--card));border:1px solid var(--line);border-radius:22px}
+    .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
+    .product-grid>.row{height:100%;min-height:330px;display:flex;flex-direction:column;align-items:stretch;justify-content:space-between;padding:12px;border-radius:24px;overflow:hidden;box-shadow:0 8px 22px rgba(16,24,40,.06);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+    .product-grid>.row:hover{transform:translateY(-3px);box-shadow:0 15px 30px rgba(16,24,40,.1)}
+    .product-grid .row-main{display:flex;flex:1;flex-direction:column;align-items:stretch;gap:12px}.product-grid .thumb{width:100%;height:155px;border-radius:19px;background:linear-gradient(145deg,#f9fafb,#eef1f5);font-size:42px}
+    .product-grid .thumb img{object-fit:contain;padding:8px}.product-grid .row-text{width:100%;padding:0 3px}.product-grid .row h3{font-size:16px;white-space:normal;line-height:1.45;margin-bottom:5px}
+    .product-grid .row p{line-height:1.65}.product-grid .actions{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(68px,1fr));margin-top:10px}.product-grid .actions .btn{width:100%;padding:8px 7px}
+    #shoppingSummary .metric{min-height:100px}html[data-theme="dark"] .product-toolbar{background:#12182a}html[data-theme="dark"] .product-grid .thumb{background:linear-gradient(145deg,#111629,#1c2338)}
+    @media(max-width:980px){
+      .app{padding:14px}.cols4{grid-template-columns:repeat(2,1fr)}.cols3{grid-template-columns:repeat(2,1fr)}.cols2{grid-template-columns:1fr}
+      .hero{flex-direction:row;align-items:center}.row{align-items:center;flex-direction:row}.actions{width:auto;justify-content:flex-end}.product-grid>.row{flex-direction:column;align-items:stretch}.product-grid .actions{width:100%}
+    }
+    @media(max-width:700px){
+      body{padding-bottom:88px}.app{padding:10px}.hero{min-height:auto;border-radius:0 0 28px 28px;margin:-10px -10px 12px;padding:18px 16px;align-items:flex-start}
+      .brand{align-items:flex-start}.logo{width:50px;height:50px;border-radius:17px;font-size:25px}.hero h1{font-size:22px}.hero p{font-size:11px;max-width:210px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .hero-actions{width:auto;margin-inline-start:auto;gap:5px;flex-wrap:nowrap}.role-pill{display:none}.hero-actions .btn.icon{width:37px;height:37px;flex:0 0 37px}
+      .nav{position:fixed;top:auto;bottom:8px;left:8px;right:8px;margin:0;padding:6px;display:flex;overflow-x:auto;justify-content:flex-start;border-radius:23px;background:color-mix(in srgb,var(--card) 92%,transparent);z-index:100;scrollbar-width:none}.nav::-webkit-scrollbar{display:none}
+      .tab{min-width:76px;min-height:58px;padding:6px;flex-direction:column;gap:1px;border-radius:18px;font-size:10px}.tab-icon{font-size:20px}
+      .card{padding:14px;border-radius:23px}.title{font-size:18px;align-items:flex-start;flex-direction:column}.title>.actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.title>.actions .btn:first-child:nth-last-child(3){grid-column:1/-1}
+      .cols2,.cols3,.cols4{grid-template-columns:1fr}.metric{min-height:96px}.grid.cols4{grid-template-columns:repeat(2,1fr);gap:9px}.grid.cols4 .metric{padding:11px}.grid.cols4 .metric .v{font-size:18px}
+      .product-toolbar{grid-template-columns:1fr!important;padding:10px;gap:8px}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.product-grid>.row{min-height:292px;padding:8px;border-radius:19px}
+      .product-grid .thumb{height:125px;border-radius:15px}.product-grid .row h3{font-size:13px}.product-grid .row p{font-size:10px}.product-grid .badge{font-size:9px}.product-grid .actions{grid-template-columns:1fr;gap:5px}.product-grid .actions .btn{min-height:35px;font-size:10px}
+      #shoppingSummary{grid-template-columns:repeat(3,1fr);gap:7px!important}#shoppingSummary .metric{min-height:88px;padding:9px}#shoppingSummary .metric .v{font-size:15px}#shoppingSummary .metric .n{display:none}
+      .sheet{border-radius:26px 26px 0 0;padding:15px;max-height:94vh}.sheet .cols3,.sheet .cols2{grid-template-columns:1fr}
+    }
+    @media(max-width:350px){.product-grid{grid-template-columns:1fr}.product-grid>.row{min-height:auto}.product-grid .thumb{height:165px}#shoppingSummary{grid-template-columns:1fr}.grid.cols4{grid-template-columns:1fr 1fr}}
   </style>
 </head>
 <body>
@@ -135,14 +173,14 @@
   </header>
 
   <nav class="nav" id="tabs">
-    <div class="tab active" data-page="dashboard">الرئيسية</div>
-    <div class="tab" data-page="bills">الفواتير</div>
-    <div class="tab" data-page="catalog">المقاضي</div>
-    <div class="tab" data-page="shopping">الشراء</div>
-    <div class="tab" data-page="tasks">المهام</div>
-    <div class="tab" data-page="expenses">المصاريف</div>
-    <div class="tab" data-page="reports">التقارير</div>
-    <div class="tab" data-page="settings">الإعدادات</div>
+    <div class="tab active" data-page="dashboard"><span class="tab-icon">⌂</span><span>الرئيسية</span></div>
+    <div class="tab" data-page="bills"><span class="tab-icon">▤</span><span>الفواتير</span></div>
+    <div class="tab" data-page="catalog"><span class="tab-icon">▦</span><span>المقاضي</span></div>
+    <div class="tab" data-page="shopping"><span class="tab-icon">🛒</span><span>الشراء</span></div>
+    <div class="tab" data-page="tasks"><span class="tab-icon">✓</span><span>المهام</span></div>
+    <div class="tab" data-page="expenses"><span class="tab-icon">◉</span><span>المصاريف</span></div>
+    <div class="tab" data-page="reports"><span class="tab-icon">▥</span><span>التقارير</span></div>
+    <div class="tab" data-page="settings"><span class="tab-icon">⚙</span><span>الإعدادات</span></div>
   </nav>
 
   <section id="dashboard" class="page active">
@@ -173,7 +211,7 @@
   </section>
 
   <section id="catalog" class="page">
-    <div class="card">
+    <div class="card product-panel">
       <div class="title">
         <span>قائمة المقاضي المعتادة</span>
         <div class="actions">
@@ -182,17 +220,17 @@
           <button class="btn primary catalog-manage" onclick="openItem()">+ إضافة صنف</button>
         </div>
       </div>
-      <div class="grid cols3" style="margin-bottom:12px">
+      <div class="grid cols3 product-toolbar" style="margin-bottom:14px">
         <div><label>بحث</label><input id="searchItems" placeholder="معكرونة، رز، دجاج..." oninput="renderItems()"></div>
-        <div><label>تصنيف</label><select id="filterCat" onchange="render()"><option value="">الكل</option></select></div>
-        <div><label>عرض</label><select id="filterView" onchange="render()"><option value="">كل الأصناف</option><option value="preferred">المعتمدة فقط</option><option value="cheap">الأرخص في مجموعتها</option></select></div>
+        <div><label>تصنيف</label><select id="filterCat" onchange="renderItems()"><option value="">الكل</option></select></div>
+        <div><label>عرض</label><select id="filterView" onchange="renderItems()"><option value="">كل الأصناف</option><option value="preferred">المعتمدة فقط</option><option value="cheap">الأرخص في مجموعتها</option></select></div>
       </div>
-      <div id="itemsList" class="list"></div>
+      <div id="itemsList" class="list product-grid"></div>
     </div>
   </section>
 
   <section id="shopping" class="page">
-    <div class="card">
+    <div class="card product-panel">
       <div class="title">
         <span>قائمة الشراء</span>
         <div class="actions">
@@ -200,7 +238,13 @@
           <button class="btn primary shopping-manage" onclick="openShopping()">+ إضافة</button>
         </div>
       </div>
-      <div id="shoppingList" class="list"></div>
+      <div class="grid cols3 product-toolbar" style="margin-bottom:14px">
+        <div><label>بحث في القائمة</label><input id="searchShopping" placeholder="اسم الصنف أو الشركة..." oninput="renderShopping()"></div>
+        <div><label>التصنيف</label><select id="shoppingCategory" onchange="renderShopping()"><option value="">كل التصنيفات</option></select></div>
+        <div><label>الحالة</label><select id="shoppingStatus" onchange="renderShopping()"><option value="">الكل</option><option value="pending">المطلوب شراؤه</option><option value="done">تم شراؤه</option></select></div>
+      </div>
+      <div id="shoppingSummary" class="grid cols3" style="margin-bottom:12px"></div>
+      <div id="shoppingList" class="list product-grid"></div>
     </div>
   </section>
 
@@ -280,7 +324,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=11"></script>
+<script src="alamer-images.js?v=13"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -701,6 +745,7 @@ function render(){
 
   renderAlerts(); renderCheap(); renderBills(); renderFilters(); renderItems(); renderShopping(); renderTasks(); renderExpenses(); renderReports(); renderSettings();
 }
+window.render=render;
 function renderPermissionUI(){
   const toggle=(selector,visible)=>document.querySelectorAll(selector).forEach(el=>el.classList.toggle('hidden',!visible));
   toggle('.owner-only',isOwner());
@@ -768,8 +813,28 @@ window.renderItems=renderItems;
 function renderShopping(){
   const manage=can('canManageShopping');
   const recordExpense=manage&&can('canManageExpenses');
-  $('shoppingList').innerHTML=data.shopping.length?data.shopping.map(s=>{const i=byId(s.itemId,data.items)||{};return `<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'')}</p></div></div>${manage?`<div class="actions">${recordExpense?`<button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button>`:''}<button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`}).join(''):`<div class="empty">قائمة الشراء فارغة.</div>`;
+  const categorySelect=$('shoppingCategory');
+  if(categorySelect){
+    const current=categorySelect.value;
+    const categories=[...new Set(data.shopping.map(s=>byId(s.itemId,data.items)?.category).filter(Boolean))];
+    categorySelect.innerHTML='<option value="">كل التصنيفات</option>'+categories.map(category=>`<option value="${esc(category)}" ${current===category?'selected':''}>${esc(category)}</option>`).join('');
+  }
+  const queryTokens=normalizeSearch($('searchShopping')?.value).split(' ').filter(Boolean);
+  const category=$('shoppingCategory')?.value||'';
+  const status=$('shoppingStatus')?.value||'';
+  const rows=data.shopping.map(s=>({shopping:s,item:byId(s.itemId,data.items)||{}})).filter(({shopping:s,item:i})=>{
+    const searchable=normalizeSearch([i.name,s.name,i.brand,i.group,i.category,s.note].filter(Boolean).join(' '));
+    return (!queryTokens.length||queryTokens.every(token=>searchable.includes(token)))&&
+      (!category||i.category===category)&&
+      (!status||(status==='done'?s.done:!s.done));
+  });
+  const totalMin=sum(rows,({shopping:s,item:i})=>(Number(i.priceMin)||0)*(Number(s.qty)||1));
+  const totalMax=sum(rows,({shopping:s,item:i})=>(Number(i.priceMax)||Number(i.priceMin)||0)*(Number(s.qty)||1));
+  const pendingCount=rows.filter(({shopping})=>!shopping.done).length;
+  if($('shoppingSummary'))$('shoppingSummary').innerHTML=`<div class="metric"><div class="k">عدد النتائج</div><div class="v">${rows.length}</div><div class="n">من ${data.shopping.length} صنف في القائمة</div></div><div class="metric"><div class="k">المطلوب شراؤه</div><div class="v">${pendingCount}</div><div class="n">حسب الفلتر الحالي</div></div><div class="metric"><div class="k">السعر الإجمالي التقريبي</div><div class="v">${money(totalMin)} - ${money(totalMax)} ${family.currency}</div><div class="n">للأصناف المعروضة وكمياتها</div></div>`;
+  $('shoppingList').innerHTML=rows.length?rows.map(({shopping:s,item:i})=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${esc(i.category||'بدون تصنيف')} | ${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'')}</p></div></div>${manage?`<div class="actions">${recordExpense?`<button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button>`:''}<button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">${data.shopping.length?'لا توجد نتائج مطابقة للبحث أو الفلتر.':'قائمة الشراء فارغة.'}</div>`;
 }
+window.renderShopping=renderShopping;
 function taskItemsText(t){
   const arr=t.items||[]; if(!arr.length)return '';
   return arr.map(x=>{const i=byId(x.itemId,data.items)||{};return `- ${i.name||'صنف'} × ${x.qty||1}${x.note?' | '+x.note:''}`}).join('\n');
@@ -815,7 +880,8 @@ function renderSettings(){
 }
 
 function openModal(title, body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('show')}
-window.closeModal=()=>{$('modal').classList.remove('show');editCtx=null}
+function closeModal(){$('modal').classList.remove('show');editCtx=null}
+window.closeModal=closeModal;
 window.openBill=(id)=>{
   if(!requirePermission('canManageBills'))return;
   const b=id?byId(id,data.bills):{name:'',category:'الكهرباء',amount:'',period:'شهري',dueDate:todayISO(),notes:''};
@@ -843,10 +909,21 @@ window.previewItemImage=()=>{
   if(box)box.innerHTML=image?`<img src="${esc(image)}" alt="" onerror="this.remove();this.parentElement.textContent='تعذر تحميل الصورة'">`:'🛒';
 }
 window.saveItem=async()=>{
+  const name=v('i_name');
+  if(!name)return alert('اكتب اسم الصنف أولًا.');
+  const priceMin=num('i_pmin'),priceMax=num('i_pmax')||priceMin;
+  if(priceMin<0||priceMax<0)return alert('السعر يجب أن يكون صفرًا أو أكبر.');
   const imageUrl=safeImageUrl(v('i_image_url'));
   if(v('i_image_url')&&!imageUrl)return alert('رابط الصورة غير صحيح. استخدم images/name.webp أو رابط https.');
-  await saveDoc('items',{id:editCtx.id,name:v('i_name'),brand:v('i_brand'),group:v('i_group')||v('i_name'),category:v('i_category'),store:v('i_store'),priceMin:num('i_pmin'),priceMax:num('i_pmax')||num('i_pmin'),unitSize:num('i_size')||1,unitLabel:v('i_unit')||'وحدة',dailyPerPerson:num('i_dpp'),dailyFixed:num('i_dfixed'),preferred:$('i_pref').classList.contains('active'),imageUrl,image:''});
-  closeModal();
+  try{
+    const isNew=!editCtx?.id;
+    await saveDoc('items',{id:editCtx?.id,name,brand:v('i_brand'),group:v('i_group')||name,category:v('i_category')||'أخرى',store:v('i_store'),priceMin,priceMax,unitSize:num('i_size')||1,unitLabel:v('i_unit')||'وحدة',dailyPerPerson:num('i_dpp'),dailyFixed:num('i_dfixed'),preferred:$('i_pref')?.classList.contains('active')!==false,imageUrl,image:''});
+    closeModal();
+    alert(isNew?'تمت إضافة الصنف بنجاح':'تم تحديث الصنف بنجاح');
+  }catch(e){
+    console.error(e);
+    alert(`تعذر حفظ الصنف: ${friendlyError(e)}`);
+  }
 }
 
 window.openShopping=()=>{if(!requirePermission('canManageShopping'))return;openModal('إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item">${data.items.map(i=>`<option value="${i.id}">${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" value="1"></div><div style="grid-column:1/-1"><label>ملاحظة</label><input id="s_note" placeholder="خذ الأرخص / الحجم الكبير"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">إضافة</button></div>`)}
@@ -1127,7 +1204,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=11',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=13',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
