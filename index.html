@@ -280,7 +280,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=10"></script>
+<script src="alamer-images.js?v=11"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -660,8 +660,22 @@ function safeImageUrl(url){
     return ['http:','https:'].includes(parsed.protocol)?parsed.href:'';
   }catch(e){return ''}
 }
+function catalogImageUrl(i){
+  const saved=i?.imageUrl||(!String(i?.image||'').startsWith('data:')?i?.image:'');
+  if(saved)return saved;
+  const map=window.ALAMER_IMAGE_MAP||{};
+  const exact=map[`${i?.name||''}|${i?.brand||''}`];
+  if(exact)return exact;
+  const name=normalizeSearch(i?.name);
+  const brand=normalizeSearch(i?.brand);
+  const key=Object.keys(map).find(entry=>{
+    const [mapName,mapBrand='']=entry.split('|');
+    return normalizeSearch(mapName)===name&&(!brand||normalizeSearch(mapBrand)===brand);
+  });
+  return key?map[key]:'';
+}
 function thumb(i){
-  const image=safeImageUrl(i?.imageUrl||i?.image);
+  const image=safeImageUrl(catalogImageUrl(i));
   return `<div class="thumb">${image?`<img src="${esc(image)}" alt="${esc(i?.name||'صورة منتج')}" loading="lazy" decoding="async" onerror="this.remove();this.parentElement.textContent='🛒'">`:'🛒'}</div>`;
 }
 
@@ -750,6 +764,7 @@ function renderItems(){
   const manageCatalog=can('canManageCatalog'), manageShopping=can('canManageShopping');
   $('itemsList').innerHTML=arr.length?arr.map(i=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name)} ${i.preferred?'<span class="badge purple">معتمد</span>':''}</h3><p>${esc(i.category||'-')} | المجموعة: ${esc(i.group||'-')} | ${money(i.priceMin)} - ${money(i.priceMax||i.priceMin)} ${family.currency} | ${esc(i.store||'سعر تقريبي')}</p><p>يكفي تقريباً: <b>${calcDaysText(i)}</b></p></div></div><div class="actions">${manageShopping?`<button class="btn small green" onclick="addToShopping('${i.id}')">أضف للشراء</button>`:''}${manageCatalog?`<button class="btn small" onclick="openItem('${i.id}')">تعديل</button><button class="btn small red" onclick="removeDoc('items','${i.id}')">حذف</button>`:''}</div></div>`).join(''):`<div class="empty">لا توجد أصناف.</div>`;
 }
+window.renderItems=renderItems;
 function renderShopping(){
   const manage=can('canManageShopping');
   const recordExpense=manage&&can('canManageExpenses');
@@ -1112,7 +1127,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=10',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=11',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
