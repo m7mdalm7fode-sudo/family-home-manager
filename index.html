@@ -324,7 +324,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=14"></script>
+<script src="alamer-images.js?v=15"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -842,7 +842,7 @@ function renderShopping(){
   const totalMax=sum(rows,({shopping:s,item:i})=>(Number(i.priceMax)||Number(i.priceMin)||0)*(Number(s.qty)||1));
   const pendingCount=rows.filter(({shopping})=>!shopping.done).length;
   if($('shoppingSummary'))$('shoppingSummary').innerHTML=`<div class="metric"><div class="k">عدد النتائج</div><div class="v">${rows.length}</div><div class="n">من ${data.shopping.length} صنف في القائمة</div></div><div class="metric"><div class="k">المطلوب شراؤه</div><div class="v">${pendingCount}</div><div class="n">حسب الفلتر الحالي</div></div><div class="metric"><div class="k">السعر الإجمالي التقريبي</div><div class="v">${money(totalMin)} - ${money(totalMax)} ${family.currency}</div><div class="n">للأصناف المعروضة وكمياتها</div></div>`;
-  $('shoppingList').innerHTML=rows.length?rows.map(({shopping:s,item:i})=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${esc(i.category||'بدون تصنيف')} | ${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'')}</p></div></div>${manage?`<div class="actions">${recordExpense?`<button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button>`:''}<button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">${data.shopping.length?'لا توجد نتائج مطابقة للبحث أو الفلتر.':'قائمة الشراء فارغة.'}</div>`;
+  $('shoppingList').innerHTML=rows.length?rows.map(({shopping:s,item:i})=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${esc(i.category||'بدون تصنيف')} | ${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'بدون ملاحظة')}</p></div></div>${manage?`<div class="actions">${recordExpense?`<button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button>`:''}<button class="btn small" onclick="openShopping('${s.id}')">تعديل</button><button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">${data.shopping.length?'لا توجد نتائج مطابقة للبحث أو الفلتر.':'قائمة الشراء فارغة.'}</div>`;
 }
 window.renderShopping=renderShopping;
 function taskItemsText(t){
@@ -936,9 +936,31 @@ window.saveItem=async()=>{
   }
 }
 
-window.openShopping=()=>{if(!requirePermission('canManageShopping'))return;openModal('إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item">${data.items.map(i=>`<option value="${i.id}">${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" value="1"></div><div style="grid-column:1/-1"><label>ملاحظة</label><input id="s_note" placeholder="خذ الأرخص / الحجم الكبير"></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">إضافة</button></div>`)}
-window.saveShopping=async()=>{await saveDoc('shopping',{itemId:v('s_item'),qty:num('s_qty')||1,note:v('s_note'),done:false});closeModal();}
-window.addToShopping=async(id)=>{if(!requirePermission('canManageShopping'))return;await saveDoc('shopping',{itemId:id,qty:1,note:'',done:false})}
+window.openShopping=(shoppingId='',selectedItemId='')=>{
+  if(!requirePermission('canManageShopping'))return;
+  const shopping=shoppingId?byId(shoppingId,data.shopping):null;
+  const itemId=shopping?.itemId||selectedItemId||data.items[0]?.id||'';
+  if(!itemId)return alert('أضف صنفًا إلى قائمة المقاضي أولًا.');
+  editCtx={col:'shopping',id:shopping?.id||'',isNew:!shopping};
+  openModal(shopping?'تعديل عنصر قائمة الشراء':'إضافة إلى قائمة الشراء',`<div class="grid cols2"><div><label>الصنف</label><select id="s_item" ${shopping?'disabled':''}>${data.items.map(i=>`<option value="${i.id}" ${i.id===itemId?'selected':''}>${esc(i.name)} - ${esc(i.brand||'')}</option>`).join('')}</select></div><div><label>الكمية</label><input id="s_qty" type="number" min="0.01" step="0.01" value="${shopping?.qty||1}"></div><div style="grid-column:1/-1"><label>ملاحظة</label><textarea id="s_note" placeholder="مثال: خذ الحجم الكبير أو النوع الأرخص">${esc(shopping?.note||'')}</textarea></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="saveShopping()">${shopping?'حفظ التعديل':'إضافة للقائمة'}</button></div>`);
+}
+window.saveShopping=async()=>{
+  const qty=num('s_qty');
+  if(qty<=0)return alert('اكتب كمية أكبر من صفر.');
+  const existing=editCtx?.id?byId(editCtx.id,data.shopping):null;
+  try{
+    await saveDoc('shopping',{id:editCtx?.id,itemId:v('s_item')||existing?.itemId,qty,note:v('s_note'),done:existing?.done||false});
+    closeModal();
+  }catch(e){
+    console.error(e);
+    alert(`تعذر حفظ العنصر: ${friendlyError(e)}`);
+  }
+}
+window.addToShopping=(itemId)=>{
+  if(!requirePermission('canManageShopping'))return;
+  const existing=data.shopping.find(s=>s.itemId===itemId&&!s.done);
+  openShopping(existing?.id||'',existing?'':itemId);
+}
 window.buildRoutineList=async()=>{if(!requirePermission('canManageShopping'))return;for(const i of data.items.filter(x=>x.preferred)){if(!data.shopping.some(s=>s.itemId===i.id&&!s.done))await saveDoc('shopping',{itemId:i.id,qty:1,note:'',done:false})}}
 window.toggleBought=async(id)=>{if(!requirePermission('canManageShopping'))return;const s=byId(id,data.shopping); if(s)await saveDoc('shopping',{...s,done:!s.done})}
 window.markShoppingBought=(id)=>{
@@ -1214,7 +1236,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=14',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=15',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
