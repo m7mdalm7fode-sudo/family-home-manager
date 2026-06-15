@@ -324,7 +324,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=13"></script>
+<script src="alamer-images.js?v=14"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -632,6 +632,15 @@ function friendlyError(e){
   return e?.message||'حدث خطأ غير متوقع';
 }
 function persistDemo(){if(DEMO)localStorage.setItem(STORE_KEY,JSON.stringify({family,data}))}
+function cleanFirestoreData(value){
+  if(Array.isArray(value))return value.map(cleanFirestoreData).filter(item=>item!==undefined);
+  if(value&&typeof value==='object'&&(Object.getPrototypeOf(value)===Object.prototype||Object.getPrototypeOf(value)===null)){
+    return Object.fromEntries(Object.entries(value)
+      .filter(([,item])=>item!==undefined)
+      .map(([key,item])=>[key,cleanFirestoreData(item)]));
+  }
+  return value;
+}
 const COLLECTION_PERMISSIONS={
   bills:'canManageBills',items:'canManageCatalog',shopping:'canManageShopping',
   expenses:'canManageExpenses'
@@ -639,6 +648,7 @@ const COLLECTION_PERMISSIONS={
 async function saveDoc(col,obj){
   const permission=COLLECTION_PERMISSIONS[col];
   if(permission && !requirePermission(permission))throw new Error('permission-denied');
+  obj=cleanFirestoreData(obj);
   if(DEMO){
     if(!obj.id)obj.id=uid();
     if(!obj.createdBy)obj.createdBy=currentUser.uid;
@@ -1204,7 +1214,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=13',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=14',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
