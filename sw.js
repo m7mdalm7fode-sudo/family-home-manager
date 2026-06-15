@@ -1,4 +1,4 @@
-const CACHE_NAME='family-home-manager-v4';
+const CACHE_NAME='family-home-manager-v5';
 const APP_SHELL=['./','./index.html','./manifest.json','./icon.svg'];
 
 self.addEventListener('install',event=>{
