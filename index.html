@@ -110,6 +110,7 @@
       .cols2,.cols3,.cols4{grid-template-columns:1fr}.metric{min-height:96px}.grid.cols4{grid-template-columns:repeat(2,1fr);gap:9px}.grid.cols4 .metric{padding:11px}.grid.cols4 .metric .v{font-size:18px}
       .product-toolbar{grid-template-columns:1fr!important;padding:10px;gap:8px}.product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.product-grid>.row{min-height:292px;padding:8px;border-radius:19px}
       .product-grid .thumb{height:125px;border-radius:15px}.product-grid .row h3{font-size:13px}.product-grid .row p{font-size:10px}.product-grid .badge{font-size:9px}.product-grid .actions{grid-template-columns:1fr;gap:5px}.product-grid .actions .btn{min-height:35px;font-size:10px}
+      #shoppingList.product-grid{grid-template-columns:1fr}#shoppingList.product-grid>.row{min-height:auto}#shoppingList.product-grid .thumb{height:170px}
       #shoppingSummary{grid-template-columns:repeat(3,1fr);gap:7px!important}#shoppingSummary .metric{min-height:88px;padding:9px}#shoppingSummary .metric .v{font-size:15px}#shoppingSummary .metric .n{display:none}
       .sheet{border-radius:26px 26px 0 0;padding:15px;max-height:94vh}.sheet .cols3,.sheet .cols2{grid-template-columns:1fr}
     }
@@ -234,6 +235,7 @@
       <div class="title">
         <span>قائمة الشراء</span>
         <div class="actions">
+          <button class="btn secondary" onclick="printShoppingList()">طباعة القائمة</button>
           <button class="btn secondary shopping-manage" onclick="buildRoutineList()">إنشاء من المعتمد</button>
           <button class="btn primary shopping-manage" onclick="openShopping()">+ إضافة</button>
         </div>
@@ -241,7 +243,7 @@
       <div class="grid cols3 product-toolbar" style="margin-bottom:14px">
         <div><label>بحث في القائمة</label><input id="searchShopping" placeholder="اسم الصنف أو الشركة..." oninput="renderShopping()"></div>
         <div><label>التصنيف</label><select id="shoppingCategory" onchange="renderShopping()"><option value="">كل التصنيفات</option></select></div>
-        <div><label>الحالة</label><select id="shoppingStatus" onchange="renderShopping()"><option value="">الكل</option><option value="pending">المطلوب شراؤه</option><option value="done">تم شراؤه</option></select></div>
+        <div><label>الحالة</label><select id="shoppingStatus" onchange="renderShopping()"><option value="pending">المطلوب شراؤه</option><option value="">الكل</option><option value="done">تم شراؤه</option></select></div>
       </div>
       <div id="shoppingSummary" class="grid cols3" style="margin-bottom:12px"></div>
       <div id="shoppingList" class="list product-grid"></div>
@@ -324,7 +326,7 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=15"></script>
+<script src="alamer-images.js?v=16"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -583,7 +585,7 @@ function subscribeFamily(){
   }));
   ['bills','items','shopping','tasks','expenses','members'].forEach(col=>{
     unsubs.push(onSnapshot(collection(fs,'families',currentFamilyId,col),snap=>{
-      data[col]=snap.docs.map(d=>({id:d.id,...d.data()}));
+      data[col]=snap.docs.map(d=>({...d.data(),id:d.id}));
       if(col==='members'){
         data.members=data.members.map(normalizeMember);
         const me=data.members.find(m=>m.uid===currentUser.uid);
@@ -656,6 +658,7 @@ async function saveDoc(col,obj){
     persistDemo(); render(); return obj.id;
   }
   if(obj.id){const id=obj.id; delete obj.id; await setDoc(doc(fs,'families',currentFamilyId,col,id),obj,{merge:true}); return id;}
+  delete obj.id;
   const ref=await addDoc(collection(fs,'families',currentFamilyId,col),{...obj,createdAt:serverTimestamp(),createdBy:currentUser.uid}); return ref.id;
 }
 async function removeDoc(col,id){
@@ -831,7 +834,7 @@ function renderShopping(){
   }
   const queryTokens=normalizeSearch($('searchShopping')?.value).split(' ').filter(Boolean);
   const category=$('shoppingCategory')?.value||'';
-  const status=$('shoppingStatus')?.value||'';
+  const status=$('shoppingStatus')?.value||'pending';
   const rows=data.shopping.map(s=>({shopping:s,item:byId(s.itemId,data.items)||{}})).filter(({shopping:s,item:i})=>{
     const searchable=normalizeSearch([i.name,s.name,i.brand,i.group,i.category,s.note].filter(Boolean).join(' '));
     return (!queryTokens.length||queryTokens.every(token=>searchable.includes(token)))&&
@@ -842,7 +845,7 @@ function renderShopping(){
   const totalMax=sum(rows,({shopping:s,item:i})=>(Number(i.priceMax)||Number(i.priceMin)||0)*(Number(s.qty)||1));
   const pendingCount=rows.filter(({shopping})=>!shopping.done).length;
   if($('shoppingSummary'))$('shoppingSummary').innerHTML=`<div class="metric"><div class="k">عدد النتائج</div><div class="v">${rows.length}</div><div class="n">من ${data.shopping.length} صنف في القائمة</div></div><div class="metric"><div class="k">المطلوب شراؤه</div><div class="v">${pendingCount}</div><div class="n">حسب الفلتر الحالي</div></div><div class="metric"><div class="k">السعر الإجمالي التقريبي</div><div class="v">${money(totalMin)} - ${money(totalMax)} ${family.currency}</div><div class="n">للأصناف المعروضة وكمياتها</div></div>`;
-  $('shoppingList').innerHTML=rows.length?rows.map(({shopping:s,item:i})=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${esc(i.category||'بدون تصنيف')} | ${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'بدون ملاحظة')}</p></div></div>${manage?`<div class="actions">${recordExpense?`<button class="btn small green" onclick="markShoppingBought('${s.id}')">تسجيل شراء</button>`:''}<button class="btn small" onclick="openShopping('${s.id}')">تعديل</button><button class="btn small" onclick="toggleBought('${s.id}')">${s.done?'إرجاع':'تم'}</button><button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">${data.shopping.length?'لا توجد نتائج مطابقة للبحث أو الفلتر.':'قائمة الشراء فارغة.'}</div>`;
+  $('shoppingList').innerHTML=rows.length?rows.map(({shopping:s,item:i})=>`<div class="row"><div class="row-main">${thumb(i)}<div class="row-text"><h3>${esc(i.name||s.name)} × ${s.qty} ${s.done?'<span class="badge green">تم</span>':''}</h3><p>${esc(i.category||'بدون تصنيف')} | ${money((Number(i.priceMin)||0)*s.qty)} - ${money((Number(i.priceMax)||Number(i.priceMin)||0)*s.qty)} ${family.currency} | يكفي ${calcDaysText(i,s.qty)}</p><p>${esc(s.note||'بدون ملاحظة')}</p></div></div>${manage?`<div class="actions"><button class="btn small green" onclick="completeShopping('${s.id}')">تم</button><button class="btn small" onclick="openShopping('${s.id}')">تعديل</button>${s.done?`<button class="btn small" onclick="toggleBought('${s.id}')">إرجاع</button>`:''}<button class="btn small red" onclick="removeDoc('shopping','${s.id}')">حذف</button></div>`:''}</div>`).join(''):`<div class="empty">${data.shopping.length?'لا توجد نتائج مطابقة للبحث أو الفلتر.':'قائمة الشراء فارغة.'}</div>`;
 }
 window.renderShopping=renderShopping;
 function taskItemsText(t){
@@ -963,6 +966,43 @@ window.addToShopping=(itemId)=>{
 }
 window.buildRoutineList=async()=>{if(!requirePermission('canManageShopping'))return;for(const i of data.items.filter(x=>x.preferred)){if(!data.shopping.some(s=>s.itemId===i.id&&!s.done))await saveDoc('shopping',{itemId:i.id,qty:1,note:'',done:false})}}
 window.toggleBought=async(id)=>{if(!requirePermission('canManageShopping'))return;const s=byId(id,data.shopping); if(s)await saveDoc('shopping',{...s,done:!s.done})}
+window.completeShopping=async(id)=>{
+  if(!requirePermission('canManageShopping'))return;
+  if(!requirePermission('canManageExpenses'))return;
+  const s=byId(id,data.shopping), i=byId(s?.itemId,data.items);
+  if(!s||!i)return alert('تعذر العثور على هذا العنصر. حدّث الصفحة وحاول مرة أخرى.');
+  if(s.done)return;
+  const amount=avg(i.priceMin,i.priceMax)*(Number(s.qty)||1);
+  s.done=true;
+  renderShopping();
+  try{
+    await saveDoc('expenses',{title:'شراء '+(i.name||'صنف'),category:i.category==='منظفات'?'منظفات':'مقاضي',amount,date:todayISO(),notes:s.note||'',source:'shopping',sourceId:id});
+    await saveDoc('shopping',{...s,done:true,boughtAt:todayISO()});
+  }catch(e){
+    s.done=false;
+    renderShopping();
+    console.error(e);
+    alert(`تعذر تسجيل الشراء: ${friendlyError(e)}`);
+  }
+}
+window.printShoppingList=()=>{
+  const rows=data.shopping.filter(s=>!s.done).map(s=>({shopping:s,item:byId(s.itemId,data.items)||{}}));
+  if(!rows.length)return alert('لا توجد أصناف مطلوبة للطباعة.');
+  const totalMin=sum(rows,({shopping:s,item:i})=>(Number(i.priceMin)||0)*(Number(s.qty)||1));
+  const totalMax=sum(rows,({shopping:s,item:i})=>(Number(i.priceMax)||Number(i.priceMin)||0)*(Number(s.qty)||1));
+  const html=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>قائمة الشراء</title><style>
+    body{font-family:Tahoma,Arial,sans-serif;padding:24px;color:#111827}h1{margin:0 0 6px}.muted{color:#667085;margin-bottom:18px}
+    .summary{border:1px solid #e5e7eb;border-radius:14px;padding:12px;margin-bottom:16px;background:#f9fafb}
+    .item{display:grid;grid-template-columns:32px 1fr 90px;gap:12px;align-items:start;border-bottom:1px solid #eee;padding:12px 0}
+    .box{width:22px;height:22px;border:2px solid #111;border-radius:6px}.name{font-weight:800}.note{color:#667085;font-size:13px;margin-top:4px}.qty{text-align:left;font-weight:800}
+    @media print{button{display:none}body{padding:0}.item{break-inside:avoid}}
+  </style></head><body><button onclick="print()" style="padding:10px 16px;margin-bottom:16px">طباعة</button><h1>قائمة الشراء</h1><div class="muted">${new Date().toLocaleDateString('ar-SA')}</div><div class="summary">عدد الأصناف: ${rows.length} | الإجمالي التقريبي: ${money(totalMin)} - ${money(totalMax)} ${family.currency}</div>${rows.map(({shopping:s,item:i})=>`<div class="item"><div class="box"></div><div><div class="name">${esc(i.name||s.name||'صنف')}</div><div class="note">${esc(i.category||'بدون تصنيف')} ${s.note?' | '+esc(s.note):''}</div></div><div class="qty">× ${s.qty||1}</div></div>`).join('')}</body></html>`;
+  const win=window.open('','_blank');
+  if(!win)return alert('المتصفح منع نافذة الطباعة. اسمح بالنوافذ المنبثقة ثم حاول مرة أخرى.');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+}
 window.markShoppingBought=(id)=>{
   if(!requirePermission('canManageShopping') || !requirePermission('canManageExpenses'))return;
   const s=byId(id,data.shopping), i=byId(s?.itemId,data.items); if(!s||!i)return;
@@ -1236,7 +1276,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=15',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=16',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
