@@ -1,4 +1,4 @@
-const CACHE_NAME='family-home-manager-v15';
+const CACHE_NAME='family-home-manager-v16';
 const APP_SHELL=['./','./index.html','./manifest.json','./icon.svg','./alamer-images.js'];
 
 self.addEventListener('install',event=>{
