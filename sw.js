@@ -1,5 +1,5 @@
-const CACHE_NAME='family-home-manager-v16';
-const APP_SHELL=['./','./index.html','./manifest.json','./icon.svg','./alamer-images.js'];
+const CACHE_NAME='family-home-manager-v18';
+const APP_SHELL=['./','./index.html','./manifest.json','./icon.svg','./alamer-images.js','./alamer-catalog.js'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
