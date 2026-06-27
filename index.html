@@ -216,6 +216,8 @@
       <div class="title">
         <span>قائمة المقاضي المعتادة</span>
         <div class="actions">
+          <button class="btn primary catalog-manage" onclick="openAlamerSearch()">بحث العامر</button>
+          <button class="btn secondary catalog-manage" onclick="refreshCatalogFromAlamer()">تحديث من العامر</button>
           <button class="btn green catalog-manage" onclick="importInvoiceItems()">استيراد أصناف الفواتير</button>
           <button class="btn secondary catalog-manage" onclick="seedDefaultGroceries()">إضافة قائمة اعتيادية</button>
           <button class="btn primary catalog-manage" onclick="openItem()">+ إضافة صنف</button>
@@ -326,7 +328,8 @@
 
 <div class="modal" id="modal"><div class="sheet"><div class="sheet-head"><h2 id="modalTitle"></h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
-<script src="alamer-images.js?v=16"></script>
+<script src="alamer-images.js?v=18"></script>
+<script src="alamer-catalog.js?v=18"></script>
 <script type="module">
 /*
   1) أنشئ مشروع Firebase.
@@ -404,6 +407,7 @@ let unsubs=[];
 let editCtx=null;
 
 const CATS=['مقاضي أساسية','لحوم ودواجن','ألبان وبيض','خضار وفواكه','معلبات','منظفات','عناية شخصية','فواتير','أخرى'];
+const ALAMER_CATALOG_LIMIT=24;
 const $=id=>document.getElementById(id);
 const v=id=>$(id)?.value?.trim()||'';
 const num=id=>parseFloat(v(id))||0;
@@ -939,6 +943,131 @@ window.saveItem=async()=>{
   }
 }
 
+function inferAlamerDetails(product){
+  const name=product.name||'';
+  const unitMatch=name.match(/(\d+(?:\.\d+)?)\s*(كجم|كيلو|جم|غرام|لتر|مل|حبة|قطعة|كيس|علبة)/);
+  const unitSize=unitMatch?Number(unitMatch[1]):1;
+  const unitLabel=unitMatch?(unitMatch[2]==='كيلو'?'كجم':unitMatch[2]==='غرام'?'جم':unitMatch[2]):'حبة';
+  let category='مقاضي أساسية';
+  if(/دجاج|لحم|سمك|تونة|برجر|شاورما/i.test(name))category='لحوم ودواجن';
+  else if(/حليب|جبن|جبنة|قشطة|زبدة|لبن|بيض|كريمة/i.test(name))category='ألبان وبيض';
+  else if(/طماطم|خيار|بطاطس|بصل|فواكه|تفاح|موز|خضار|ليمون/i.test(name))category='خضار وفواكه';
+  else if(/فاصوليا|حمص|ذرة|معجون|صلصة|معلب|فطر/i.test(name))category='معلبات';
+  else if(/منظف|غسيل|صحون|كلور|أكياس نفايات|معطر|صابون/i.test(name))category='منظفات';
+  else if(/شامبو|معجون أسنان|مناديل|كمامة/i.test(name))category='عناية شخصية';
+  const words=normalizeSearch(name).split(' ').filter(Boolean);
+  const brand=(name.split(/\s+/)[0]||'العامر').trim();
+  const group=words.slice(1,4).join(' ')||name;
+  return {category,unitSize,unitLabel,brand,group};
+}
+function getAlamerCatalog(){
+  return Array.isArray(window.ALAMER_CATALOG)?window.ALAMER_CATALOG:[];
+}
+function alamerSearchScore(product,tokens,phrase){
+  const hay=normalizeSearch([product.name,product.category,product.id].join(' '));
+  let score=0;
+  if(phrase&&hay.includes(phrase))score+=20;
+  tokens.forEach(token=>{
+    if(!token)return;
+    if(hay===token)score+=14;
+    else if(hay.startsWith(token))score+=10;
+    else if(hay.includes(token))score+=6;
+  });
+  if(product.price)score+=1;
+  if(product.image)score+=1;
+  return score;
+}
+function renderAlamerProducts(products){
+  const box=$('alamerResults');
+  window.lastAlamerProducts=products;
+  box.innerHTML=products.length?products.map((p,index)=>`<div class="row"><div class="row-main"><div class="thumb">${p.image?`<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy" decoding="async">`:'🛒'}</div><div class="row-text"><h3>${esc(p.name)}</h3><p>سعر العامر: <b>${money(p.price)} ${family.currency}</b> | ${esc(p.category||'بدون تصنيف')}</p><p class="muted">رقم المنتج: ${esc(p.id)}${window.ALAMER_CATALOG_UPDATED_AT?` | آخر تحديث: ${new Date(window.ALAMER_CATALOG_UPDATED_AT).toLocaleDateString('ar-SA')}`:''}</p></div></div><div class="actions"><button class="btn small green" onclick="importAlamerProduct(${index})">استيراد</button><a class="btn small secondary" href="${esc(p.url)}" target="_blank" rel="noopener">فتح في العامر</a></div></div>`).join(''):'<div class="empty">ما لقيت نتائج مطابقة في كتالوج العامر المرفوع.</div>';
+}
+function itemAlamerTokens(item){
+  const ignored=new Set(['جم','جرام','كجم','كيلو','مل','لتر','حبة','حبه','كيس','علبة','علبه','قطع','قطعة','بدون','علامة']);
+  return normalizeSearch([item.name,item.brand,item.group].join(' '))
+    .split(' ')
+    .filter(token=>token.length>1&&!ignored.has(token))
+    .slice(0,7);
+}
+function findAlamerMatchForItem(item){
+  const catalog=getAlamerCatalog();
+  if(item.alamerId){
+    const exact=catalog.find(product=>product.id===item.alamerId);
+    if(exact)return exact;
+  }
+  const tokens=itemAlamerTokens(item);
+  if(!tokens.length)return null;
+  const scored=catalog.map(product=>{
+    const hay=normalizeSearch([product.name,product.category,product.id].join(' '));
+    const hits=tokens.filter(token=>hay.includes(token)).length;
+    const ratio=hits/tokens.length;
+    return {product,ratio,hits,price:Number(product.price)||0};
+  }).filter(row=>row.hits>=2&&row.ratio>=0.55&&row.price>0)
+    .sort((a,b)=>b.ratio-a.ratio||b.hits-a.hits);
+  return scored[0]?.product||null;
+}
+window.openAlamerSearch=()=>{
+  if(!requirePermission('canManageCatalog'))return;
+  const count=getAlamerCatalog().length;
+  const updated=window.ALAMER_CATALOG_UPDATED_AT?new Date(window.ALAMER_CATALOG_UPDATED_AT).toLocaleString('ar-SA'):'غير محدد';
+  openModal('بحث منتجات العامر',`<div class="grid cols2"><div><label>ابحث في كتالوج العامر</label><input id="alamerQuery" placeholder="مثال: حليب، رز، دجاج" onkeydown="if(event.key==='Enter')searchAlamerProducts()"></div><div style="display:flex;align-items:end"><button class="btn primary" style="width:100%" onclick="searchAlamerProducts()">بحث</button></div></div><div class="hint" style="margin-top:12px">يبحث التطبيق داخل كتالوج العامر المرفوع مع الموقع: ${count} منتج، آخر تحديث: ${updated}. عند الاستيراد يُضاف الاسم والسعر والصورة لقائمة المقاضي.</div><div id="alamerResults" class="list product-grid" style="margin-top:12px"></div>`);
+  setTimeout(()=>$('alamerQuery')?.focus(),50);
+}
+window.searchAlamerProducts=()=>{
+  const q=v('alamerQuery');
+  if(!q)return alert('اكتب اسم المنتج للبحث.');
+  const catalog=getAlamerCatalog();
+  const box=$('alamerResults');
+  if(!catalog.length){box.innerHTML='<div class="empty">ملف كتالوج العامر غير مرفوع. ارفع alamer-catalog.js بجانب index.html.</div>';return;}
+  box.innerHTML='<div class="empty">جاري البحث في كتالوج العامر...</div>';
+  const phrase=normalizeSearch(q);
+  const tokens=phrase.split(' ').filter(Boolean);
+  const products=catalog
+    .map(product=>({...product,score:alamerSearchScore(product,tokens,phrase)}))
+    .filter(product=>product.score>0)
+    .sort((a,b)=>b.score-a.score||Number(a.price||0)-Number(b.price||0))
+    .slice(0,ALAMER_CATALOG_LIMIT);
+  renderAlamerProducts(products);
+}
+window.importAlamerProduct=async(index)=>{
+  if(!requirePermission('canManageCatalog'))return;
+  const product=window.lastAlamerProducts?.[index];
+  if(!product)return;
+  const details={...inferAlamerDetails(product),category:product.category||inferAlamerDetails(product).category};
+  const existing=data.items.find(item=>item.alamerId===product.id||normalizeSearch(item.name)===normalizeSearch(product.name));
+  try{
+    await saveDoc('items',{id:existing?.id,name:product.name,brand:existing?.brand||details.brand,group:existing?.group||details.group,category:existing?.category||details.category,store:'العامر',priceMin:product.price,priceMax:product.price,unitSize:existing?.unitSize||details.unitSize,unitLabel:existing?.unitLabel||details.unitLabel,dailyPerPerson:existing?.dailyPerPerson||0,dailyFixed:existing?.dailyFixed||0,preferred:existing?.preferred!==false,imageUrl:product.image,image:'',alamerId:product.id,alamerUrl:product.url,updatedFromAlamer:todayISO()});
+    alert(existing?'تم تحديث الصنف من العامر':'تم استيراد الصنف من العامر');
+  }catch(e){
+    console.error(e);
+    alert(`تعذر استيراد المنتج: ${friendlyError(e)}`);
+  }
+}
+window.refreshCatalogFromAlamer=async()=>{
+  if(!requirePermission('canManageCatalog'))return;
+  const catalog=getAlamerCatalog();
+  if(!catalog.length)return alert('ملف كتالوج العامر غير مرفوع. ارفع alamer-catalog.js بجانب index.html.');
+  if(!data.items.length)return alert('ما فيه أصناف حالية لتحديثها.');
+  if(!confirm('تحديث أسعار وصور الأصناف الحالية من كتالوج العامر؟'))return;
+  let updated=0, skipped=0;
+  for(const item of data.items){
+    const match=findAlamerMatchForItem(item);
+    if(!match){skipped++;continue;}
+    await saveDoc('items',{
+      ...item,
+      store:'العامر',
+      priceMin:match.price||item.priceMin,
+      priceMax:match.price||item.priceMax||item.priceMin,
+      imageUrl:match.image||item.imageUrl||'',
+      alamerId:match.id,
+      alamerUrl:match.url,
+      updatedFromAlamer:todayISO()
+    });
+    updated++;
+  }
+  alert(`تم تحديث ${updated} صنف من العامر، وتخطّي ${skipped} صنف ما لقيت له تطابق واضح.`);
+}
+
 window.openShopping=(shoppingId='',selectedItemId='')=>{
   if(!requirePermission('canManageShopping'))return;
   const shopping=shoppingId?byId(shoppingId,data.shopping):null;
@@ -1276,7 +1405,7 @@ window.seedDefaultGroceries=async()=>{
 }
 
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js?v=16',{updateViaCache:'none'})
+  navigator.serviceWorker.register('sw.js?v=18',{updateViaCache:'none'})
     .then(reg=>reg.update())
     .catch(()=>{});
 }
